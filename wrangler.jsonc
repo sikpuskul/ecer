@@ -49,7 +49,7 @@
       ],
       "vars": {
         "APP_NAME": "ECER",
-        "APP_BASE_URL": "https://ecer-staging.workers.dev",
+        "APP_BASE_URL": "https://ecer-staging.siksumakul.workers.dev",
         "APP_ENV": "staging",
         "APP_TIMEZONE": "Asia/Jakarta",
         "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",

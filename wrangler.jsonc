@@ -6,7 +6,7 @@
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*"],
   },
   "d1_databases": [
     {
@@ -22,26 +22,39 @@
       "bucket_name": "ecer-flyers-local",
     },
   ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "ecer-local",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "FLYER_BUCKET",
-      "bucket_name": "ecer-flyers-local"
-    }
-  ],
   "vars": {
     "APP_NAME": "ECER",
     "APP_BASE_URL": "http://localhost:5173",
     "APP_ENV": "development",
     "APP_TIMEZONE": "Asia/Jakarta",
     "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
-    "ORGANIZATION_CODE": "PKM-SMK"
-  }
+    "ORGANIZATION_CODE": "PKM-SMK",
+  },
+  "env": {
+    "staging": {
+      "name": "ecer-staging",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ecer-staging",
+          "database_id": "23d57e70-7075-41d4-8642-2a2bed097743",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FLYER_BUCKET",
+          "bucket_name": "ecer-flyers-staging",
+        },
+      ],
+      "vars": {
+        "APP_NAME": "ECER",
+        "APP_BASE_URL": "https://ecer-staging.workers.dev",
+        "APP_ENV": "staging",
+        "APP_TIMEZONE": "Asia/Jakarta",
+        "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
+        "ORGANIZATION_CODE": "PKM-SMK",
+      },
+    },
+  },
 }

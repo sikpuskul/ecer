@@ -1,0 +1,21 @@
+# Cloudflare Worker local variables & secrets untuk Wrangler (.dev.vars)
+# Salin ke .dev.vars untuk pengembangan lokal. Jangan pernah commit .dev.vars!
+
+APP_NAME=ECER
+APP_BASE_URL=http://localhost:5173
+APP_ENV=development
+APP_TIMEZONE=Asia/Jakarta
+ORGANIZATION_NAME=Puskesmas Sumbermanjing Kulon
+ORGANIZATION_CODE=PKM-SMK
+
+# Cloudflare Turnstile (Phase 1+ — gunakan test key resmi Cloudflare untuk local dev)
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Google Apps Script Integration (Phase 1+)
+GAS_WEB_APP_URL=
+GAS_SHARED_SECRET=replace-with-local-dev-secret-min-32-bytes
+
+# Dedicated Cryptographic Keys (Phase 1+ — generate terpisah per environment)
+DATA_ENCRYPTION_KEY=replace-with-base64-32-byte-aes-gcm-key
+LOOKUP_HMAC_KEY=replace-with-base64-32-byte-hmac-key

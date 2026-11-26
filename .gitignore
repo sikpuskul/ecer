@@ -1,0 +1,28 @@
+# Environment & secrets
+.env
+.env.local
+.env.production
+.env.*.local
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Google CLASP credentials
+.clasp.json
+.clasprc.json
+
+# Dependencies & build output
+node_modules/
+dist/
+.wrangler/
+
+# Testing & coverage
+coverage/
+playwright-report/
+test-results/
+
+# Local tooling state
+.impeccable/config.local.json
+.DS_Store
+Thumbs.db

@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ecer",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ecer-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FLYER_BUCKET",
+      "bucket_name": "ecer-flyers-local",
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ecer-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FLYER_BUCKET",
+      "bucket_name": "ecer-flyers-local"
+    }
+  ],
+  "vars": {
+    "APP_NAME": "ECER",
+    "APP_BASE_URL": "http://localhost:5173",
+    "APP_ENV": "development",
+    "APP_TIMEZONE": "Asia/Jakarta",
+    "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
+    "ORGANIZATION_CODE": "PKM-SMK"
+  }
+}

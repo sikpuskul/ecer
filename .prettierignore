@@ -1,0 +1,12 @@
+dist/
+node_modules/
+.wrangler/
+coverage/
+playwright-report/
+test-results/
+.agent/
+.agents/
+.impeccable/
+PRD.md
+package-lock.json
+skills-lock.json

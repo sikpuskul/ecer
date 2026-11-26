@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-26T16:05:00.000Z",
+  "title": "Design System: ECER — Sertifikat dan Piagam Digital",
+  "extensions": {
+    "colorMeta": {
+      "primary-forest": {
+        "role": "primary",
+        "displayName": "Primary Forest",
+        "canonical": "#123F38",
+        "tonalRamp": ["#091F1C", "#123F38", "#1B5B51", "#28796C", "#4A9A8D", "#7DBDB2", "#B5DCD5", "#E4F3F0"]
+      },
+      "primary-green": {
+        "role": "primary",
+        "displayName": "Primary Green",
+        "canonical": "#23634E",
+        "tonalRamp": ["#0E2B22", "#184637", "#23634E", "#2F8066", "#4BA084", "#7BBFA8", "#B2DCD0", "#E4F3EE"]
+      },
+      "accent-mint": {
+        "role": "secondary",
+        "displayName": "Accent Mint",
+        "canonical": "#D9EBE0",
+        "tonalRamp": ["#1C3B2A", "#2E5D43", "#468261", "#68A583", "#91C3A7", "#B7D9C5", "#D9EBE0", "#F0F8F3"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas",
+        "canonical": "#F5F7F6",
+        "tonalRamp": ["#1A211E", "#333E39", "#526059", "#74837C", "#9BA8A2", "#C2CCC7", "#DFE7E2", "#F5F7F6"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#1E2623", "#3B4641", "#5C6862", "#818D87", "#A7B1AC", "#CCD3CF", "#E9EDEB", "#FFFFFF"]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Text Primary",
+        "canonical": "#203F35",
+        "tonalRamp": ["#0D1C17", "#203F35", "#325C4E", "#4A7A6A", "#6D9A8B", "#97BAA0", "#C5DAD2", "#EAF3F0"]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Text Secondary",
+        "canonical": "#64748B",
+        "tonalRamp": ["#1E293B", "#334155", "#475569", "#64748B", "#94A3B8", "#CBD5E1", "#E2E8F0", "#F8FAFC"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "#DFE7E2",
+        "tonalRamp": ["#202B25", "#3A4941", "#596A61", "#7C8E85", "#A2B2AA", "#C4D1CA", "#DFE7E2", "#F3F7F5"]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warning",
+        "canonical": "#B45309",
+        "tonalRamp": ["#451A03", "#78350F", "#92400E", "#B45309", "#D97706", "#F59E0B", "#FDE68A", "#FFFBEB"]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "canonical": "#B91C1C",
+        "tonalRamp": ["#450A0A", "#7F1D1D", "#991B1B", "#B91C1C", "#DC2626", "#EF4444", "#FECACA", "#FEF2F2"]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Success",
+        "canonical": "#15803D",
+        "tonalRamp": ["#052E16", "#14532D", "#166534", "#15803D", "#16A34A", "#22C55E", "#BBF7D0", "#F0FDF4"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Judul halaman utama publik dan verifikasi dokumen." },
+      "headline": { "displayName": "Headline", "purpose": "Judul seksi utama dan halaman admin." },
+      "title": { "displayName": "Title", "purpose": "Judul kartu kegiatan, panel formulir, dan dialog." },
+      "body": { "displayName": "Body", "purpose": "Deskripsi, panduan, dan nilai data." },
+      "label": { "displayName": "Label", "purpose": "Label field, tombol, badge status, dan metadata." }
+    },
+    "shadows": [
+      { "name": "subtle-lift", "value": "0 1px 2px rgba(18, 63, 56, 0.06)", "purpose": "Hover halus pada kartu interaktif dan header sticky." },
+      { "name": "overlay", "value": "0 10px 25px -5px rgba(18, 63, 56, 0.12)", "purpose": "Dropdown, popover, toast, dan dialog konfirmasi." }
+    ],
+    "motion": [
+      { "name": "duration-fast", "value": "150ms", "purpose": "Micro-interaction tombol dan focus ring." },
+      { "name": "duration-base", "value": "200ms", "purpose": "Transisi hover, dropdown, dan panel." },
+      { "name": "ease-standard", "value": "cubic-bezier(0.2, 0, 0, 1)", "purpose": "Easing halus untuk transisi antarmuka." }
+    ],
+    "breakpoints": [
+      { "name": "mobile-sm", "value": "320px" },
+      { "name": "mobile", "value": "480px" },
+      { "name": "tablet", "value": "640px" },
+      { "name": "desktop", "value": "1024px" },
+      { "name": "desktop-lg", "value": "1440px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tombol aksi utama seperti Isi Data Sertifikat atau Simpan.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Isi Data Sertifikat</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border: 1px solid transparent; border-radius: var(--radius-md, 8px); background: var(--color-primary-green, #23634E); color: var(--color-surface, #FFFFFF); font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 180ms cubic-bezier(0.2, 0, 0, 1); } .ds-btn-primary:hover { background: var(--color-primary-forest, #123F38); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-primary-green, #23634E); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Tombol aksi sekunder seperti Cari Sertifikat atau Batal.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cari Sertifikat</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border: 1px solid var(--color-border, #DFE7E2); border-radius: var(--radius-md, 8px); background: var(--color-surface, #FFFFFF); color: var(--color-text-primary, #203F35); font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 180ms cubic-bezier(0.2, 0, 0, 1), border-color 180ms cubic-bezier(0.2, 0, 0, 1); } .ds-btn-secondary:hover { background: var(--color-canvas, #F5F7F6); border-color: var(--color-primary-green, #23634E); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--color-primary-green, #23634E); outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Penanda status kegiatan atau kesehatan sistem dengan warna semantik dan teks eksplisit.",
+      "html": "<span class=\"ds-badge-active\">Aktif</span>",
+      "css": ".ds-badge-active { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 9999px; background: var(--color-accent-mint, #D9EBE0); color: var(--color-primary-forest, #123F38); font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; font-size: 13px; font-weight: 500; line-height: 1.4; }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Kartu datar berbatas tipis untuk kegiatan atau ringkasan status.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">Pelatihan Kader Posyandu</h3><p class=\"ds-card-meta\">Puskesmas Sumbermanjing Kulon</p></article>",
+      "css": ".ds-card { padding: 24px; border: 1px solid var(--color-border, #DFE7E2); border-radius: var(--radius-lg, 12px); background: var(--color-surface, #FFFFFF); color: var(--color-text-primary, #203F35); font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; } .ds-card-title { margin: 0 0 8px; font-size: 18px; font-weight: 600; line-height: 1.4; color: var(--color-text-primary, #203F35); } .ds-card-meta { margin: 0; font-size: 14px; color: var(--color-text-secondary, #64748B); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Input teks mobile-first dengan ukuran font minimal 16px dan tinggi 44px.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Masukkan nomor peserta\" />",
+      "css": ".ds-input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--color-border, #DFE7E2); border-radius: var(--radius-md, 8px); background: var(--color-surface, #FFFFFF); color: var(--color-text-primary, #203F35); font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif; font-size: 16px; transition: border-color 150ms cubic-bezier(0.2, 0, 0, 1), box-shadow 150ms cubic-bezier(0.2, 0, 0, 1); } .ds-input::placeholder { color: var(--color-text-secondary, #64748B); } .ds-input:focus-visible { outline: none; border-color: var(--color-primary-green, #23634E); box-shadow: 0 0 0 3px rgba(35, 99, 78, 0.16); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Layanan Publik Kesehatan yang Tenang dan Terpercaya",
+    "overview": "ECER dirancang dengan arah Modern Healthcare Editorial untuk Puskesmas Sumbermanjing Kulon. Antarmuka publik harus terasa hangat, bersih, terstruktur, dan langsung dipahami oleh kader kesehatan maupun masyarakat umum tanpa kesan portal birokrasi yang kaku ataupun tampilan dashboard generik buatan AI.",
+    "keyCharacteristics": [
+      "Palet hijau hutan dan mint natural khas layanan kesehatan masyarakat, bebas dari warna ungu maupun gradasi neon.",
+      "Tipografi tunggal Plus Jakarta Sans yang bersih dengan angka tabular untuk statistik dan nomor dokumen.",
+      "Permukaan datar dengan garis batas halus (1px solid #DFE7E2) dan radius terukur (6px, 8px, 12px).",
+      "Mobile-first dengan touch target minimal 44px dan ukuran font input minimal 16px pada perangkat mobile."
+    ],
+    "rules": [
+      {
+        "name": "The Forest Restraint Rule",
+        "body": "Warna Primary Green (#23634E) dan Primary Forest (#123F38) digunakan secara selektif untuk aksi utama dan penanda identitas agar hierarki tindakan tetap langsung terbaca.",
+        "section": "colors"
+      },
+      {
+        "name": "The Semantic Pairing Rule",
+        "body": "Status dokumen dan kegiatan tidak pernah dibedakan oleh warna saja; setiap badge status wajib memadukan warna semantik dengan label teks Bahasa Indonesia yang jelas.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Numerals Rule",
+        "body": "Seluruh statistik bulanan, nomor urut sertifikat, penghitung kuota, dan stempel waktu wajib menggunakan font-variant-numeric: tabular-nums.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Kartu, panel formulir, dan kotak statistik tampil datar tanpa bayangan berat pada kondisi diam. Hindari nested cards berlapis-lapis.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do gunakan semantic CSS variables dari src/styles/tokens.css agar tema konsisten di seluruh komponen.",
+      "Do sediakan loading state, empty state, error state, success state, dan disabled state pada setiap tampilan data.",
+      "Do gunakan Bahasa Indonesia yang ramah masyarakat pada seluruh halaman publik.",
+      "Do pertahankan touch target minimal 44px dan uji keterbacaan mulai viewport 320px."
+    ],
+    "donts": [
+      "Don't gunakan dominasi warna ungu, gradasi biru-ungu, warna neon, atau gradient text.",
+      "Don't gunakan excessive glassmorphism, bayangan tebal, atau kartu bersarang (nested cards).",
+      "Don't gunakan emoji sebagai ikon utama antarmuka.",
+      "Don't buat hero marketing setinggi satu layar penuh pada dashboard publik."
+    ]
+  }
+}

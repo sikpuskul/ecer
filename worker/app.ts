@@ -5,10 +5,14 @@ import type { AppEnv } from './env';
 import { apiNotFoundHandler, errorHandler } from './middleware/error-handler';
 import { requestIdMiddleware } from './middleware/request-id';
 import { securityHeadersMiddleware } from './middleware/security-headers';
+import { createAuditRoutes } from './modules/audit/routes';
 import { createAuthRoutes } from './modules/auth/routes';
+import { createDashboardRoutes } from './modules/dashboard/routes';
 import { createIntegrationRoutes } from './modules/integration/routes';
+import { createCategoriesRoutes, createSettingsRoutes } from './modules/settings/routes';
+import { createUsersRoutes } from './modules/users/routes';
 
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.2.0';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -39,6 +43,11 @@ export function createApp() {
   });
 
   api.route('/auth', createAuthRoutes());
+  api.route('/admin/dashboard', createDashboardRoutes());
+  api.route('/admin/users', createUsersRoutes());
+  api.route('/admin/settings', createSettingsRoutes());
+  api.route('/admin/categories', createCategoriesRoutes());
+  api.route('/admin/audit-logs', createAuditRoutes());
   api.route('/admin/integration', createIntegrationRoutes());
 
   app.route(API_BASE_PATH, api);

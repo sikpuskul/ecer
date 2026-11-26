@@ -4,21 +4,21 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 
 ## Ringkasan Status
 
-| Fase         | Nama                                                         | Status                                                                     |
-| ------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| **Phase 0**  | Project Foundation                                           | Selesai                                                                    |
+| Fase         | Nama                                                         | Status                                                   |
+| ------------ | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **Phase 0**  | Project Foundation                                           | Selesai                                                  |
 | **Phase 1**  | Security & Google Integration Feasibility _(Technical Gate)_ | Selesai (lolos uji live staging Workers Free + D1 + GAS) |
-| **Phase 2**  | Database & Core Admin                                        | Menunggu persetujuan                                                       |
-| **Phase 3**  | Event Management                                             | Belum dimulai                                                              |
-| **Phase 4**  | Templates & Dynamic Forms                                    | Belum dimulai                                                              |
-| **Phase 5**  | Public Interface & Participants                              | Belum dimulai                                                              |
-| **Phase 6**  | Document Generation                                          | Belum dimulai                                                              |
-| **Phase 7**  | PDF Delivery & Recovery                                      | Belum dimulai                                                              |
-| **Phase 8**  | Email Delivery                                               | Belum dimulai                                                              |
-| **Phase 9**  | Awards (Piagam)                                              | Belum dimulai                                                              |
-| **Phase 10** | Reports & Operations                                         | Belum dimulai                                                              |
-| **Phase 11** | Quality Assurance                                            | Belum dimulai                                                              |
-| **Phase 12** | Staging & Production Release                                 | Belum dimulai                                                              |
+| **Phase 2**  | Database & Core Admin                                        | Selesai                                                  |
+| **Phase 3**  | Event Management                                             | Menunggu persetujuan                                     |
+| **Phase 4**  | Templates & Dynamic Forms                                    | Belum dimulai                                            |
+| **Phase 5**  | Public Interface & Participants                              | Belum dimulai                                            |
+| **Phase 6**  | Document Generation                                          | Belum dimulai                                            |
+| **Phase 7**  | PDF Delivery & Recovery                                      | Belum dimulai                                            |
+| **Phase 8**  | Email Delivery                                               | Belum dimulai                                            |
+| **Phase 9**  | Awards (Piagam)                                              | Belum dimulai                                            |
+| **Phase 10** | Reports & Operations                                         | Belum dimulai                                            |
+| **Phase 11** | Quality Assurance                                            | Belum dimulai                                            |
+| **Phase 12** | Staging & Production Release                                 | Belum dimulai                                            |
 
 ---
 

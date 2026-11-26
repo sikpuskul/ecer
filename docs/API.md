@@ -96,6 +96,15 @@ Memeriksa kesiapan runtime Cloudflare Worker dan konfigurasi dasar aplikasi (tan
 - `GET /api/v1/auth/me` — Memerlukan sesi aktif (memeriksa idle timeout 30 menit & absolute timeout 12 jam); mengembalikan profil admin tanpa password hash.
 - `POST /api/v1/auth/change-password` — Memerlukan CSRF Origin valid + sesi aktif; memverifikasi password saat ini, memvalidasi kebijakan password baru (min 12 karakter), memperbarui hash, dan mencabut seluruh sesi admin lainnya secara atomik.
 
+### Core Admin API (`/api/v1/admin/*`) _(Phase 2 — seluruhnya wajib sesi admin, mutasi wajib CSRF Origin)_
+
+- `GET /api/v1/admin/dashboard` — Ringkasan metrik operasional & 8 aktivitas audit terbaru.
+- `GET /api/v1/admin/users`, `POST /api/v1/admin/users`, `PATCH /api/v1/admin/users/:id`, `POST /api/v1/admin/users/:id/reset-password` — Manajemen multi-admin (menolak penonaktifan admin aktif terakhir dengan `409`; reset password mencabut seluruh sesi akun target).
+- `GET /api/v1/admin/settings`, `PATCH /api/v1/admin/settings` — Pengaturan non-secret allowlisted.
+- `GET /api/v1/admin/categories`, `POST /api/v1/admin/categories`, `PATCH /api/v1/admin/categories/:id` — Manajemen kategori kegiatan.
+- `GET /api/v1/admin/audit-logs` — Riwayat audit log read-only terpaginasi (`page`, `limit`, filter `action` & `entityType`).
+- `GET /api/v1/admin/integration/gas-health` — Pemeriksaan kesehatan integrasi bertanda tangan Worker ↔ Google Apps Script.
+
 ### Fallback API tidak dikenal (`ALL /api/*`)
 
 Mengembalikan `404 Not Found` dalam format error JSON standar dengan kode `NOT_FOUND` (tidak pernah jatuh ke `index.html`).

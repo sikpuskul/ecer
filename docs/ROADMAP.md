@@ -10,8 +10,8 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 | **Phase 1**  | Security & Google Integration Feasibility _(Technical Gate)_ | Selesai (lolos uji live staging Workers Free + D1 + GAS) |
 | **Phase 2**  | Database & Core Admin                                        | Selesai                                                  |
 | **Phase 3**  | Event Management                                             | Selesai                                                  |
-| **Phase 4**  | Templates & Dynamic Forms                                    | Menunggu persetujuan                                     |
-| **Phase 5**  | Public Interface & Participants                              | Belum dimulai                                            |
+| **Phase 4**  | Templates & Dynamic Forms                                    | Selesai                                                  |
+| **Phase 5**  | Public Interface & Participants                              | Menunggu persetujuan                                     |
 | **Phase 6**  | Document Generation                                          | Belum dimulai                                            |
 | **Phase 7**  | PDF Delivery & Recovery                                      | Belum dimulai                                            |
 | **Phase 8**  | Email Delivery                                               | Belum dimulai                                            |

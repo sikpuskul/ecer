@@ -117,6 +117,13 @@ Memeriksa kesiapan runtime Cloudflare Worker dan konfigurasi dasar aplikasi (tan
 - `POST /api/v1/admin/storage/flyer`, `DELETE /api/v1/admin/storage/flyer/*` — Upload & hapus flyer R2 (JPEG/PNG/WebP maks. 5 MiB dengan validasi magic bytes, menolak SVG).
 - `GET /api/v1/public/assets/flyers/*` — Melayani flyer kegiatan terpublikasi (flyer draft diblokir untuk publik).
 
+### Templates & Dynamic Forms (`/api/v1/admin/templates/*`, `/api/v1/admin/events/:id/form`) _(Phase 4)_
+
+- `GET /api/v1/admin/templates`, `POST /api/v1/admin/templates/import`, `GET/PATCH/DELETE /api/v1/admin/templates/:id` — Library template Google Docs (hanya URL resmi `docs.google.com/document/d/...`, ekstraksi placeholder via Apps Script, dilarang menghapus template yang sudah dipakai).
+- `POST /api/v1/admin/templates/:id/refresh`, `validate`, `test-generate`, `GET /:id/versions` — Refresh versi baru, snapshot privat Google Docs, dan test PDF dummy tanpa nomor produksi.
+- `GET /api/v1/admin/events/:id/form`, `PUT /api/v1/admin/events/:id/form`, `POST /api/v1/admin/events/:id/form/publish` — Dynamic form builder dengan versioning non-destruktif dan proteksi ReDoS.
+- `GET/PUT /api/v1/admin/events/:id/templates` — Penautan versi template tervalidasi ke kegiatan.
+
 ### Fallback API tidak dikenal (`ALL /api/*`)
 
 Mengembalikan `404 Not Found` dalam format error JSON standar dengan kode `NOT_FOUND` (tidak pernah jatuh ke `index.html`).

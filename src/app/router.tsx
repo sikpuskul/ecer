@@ -46,6 +46,24 @@ const AdminEventEditorPage = lazy(() =>
   })),
 );
 
+const AdminTemplatesPage = lazy(() =>
+  import('@/features/templates/pages/AdminTemplatesPage').then((m) => ({
+    default: m.AdminTemplatesPage,
+  })),
+);
+
+const AdminTemplateDetailPage = lazy(() =>
+  import('@/features/templates/pages/AdminTemplateDetailPage').then((m) => ({
+    default: m.AdminTemplateDetailPage,
+  })),
+);
+
+const AdminFormBuilderPage = lazy(() =>
+  import('@/features/form-builder/pages/AdminFormBuilderPage').then((m) => ({
+    default: m.AdminFormBuilderPage,
+  })),
+);
+
 function RouteLoadingFallback() {
   return (
     <div className="flex min-h-[40vh] items-center justify-center px-4">
@@ -66,6 +84,9 @@ export function AppRouter() {
             <Route path="kegiatan" element={<AdminEventsListPage />} />
             <Route path="kegiatan/baru" element={<AdminEventEditorPage />} />
             <Route path="kegiatan/:id/edit" element={<AdminEventEditorPage />} />
+            <Route path="kegiatan/:id/formulir" element={<AdminFormBuilderPage />} />
+            <Route path="template" element={<AdminTemplatesPage />} />
+            <Route path="template/:id" element={<AdminTemplateDetailPage />} />
             <Route path="pengguna" element={<AdminUsersPage />} />
             <Route path="pengaturan" element={<AdminSettingsPage />} />
             <Route path="audit-log" element={<AdminAuditLogPage />} />

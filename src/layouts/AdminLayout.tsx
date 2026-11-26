@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileClock,
+  FileText,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -26,6 +27,7 @@ interface NavItem {
 const ADMIN_NAV_ITEMS: NavItem[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/kegiatan', label: 'Kegiatan', icon: CalendarDays },
+  { to: '/admin/template', label: 'Template Docs', icon: FileText },
   { to: '/admin/pengguna', label: 'Administrator', icon: Users },
   { to: '/admin/pengaturan', label: 'Pengaturan & Kategori', icon: Settings },
   { to: '/admin/audit-log', label: 'Audit Log', icon: FileClock },
@@ -35,6 +37,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard Administrator',
   '/admin/kegiatan': 'Manajemen Kegiatan',
   '/admin/kegiatan/baru': 'Buat Kegiatan Baru',
+  '/admin/template': 'Library Template Google Docs',
   '/admin/pengguna': 'Manajemen Administrator',
   '/admin/pengaturan': 'Pengaturan & Kategori Kegiatan',
   '/admin/audit-log': 'Riwayat Audit Log',

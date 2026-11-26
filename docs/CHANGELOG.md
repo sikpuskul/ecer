@@ -2,6 +2,16 @@
 
 Seluruh perubahan penting pada proyek ECER dicatat pada berkas ini.
 
+## [0.5.0] - 2026-11-27 (Phase 4: Templates & Dynamic Forms)
+
+### Added
+
+- Shared template & dynamic form schemas + validator (`shared/schemas/templates.ts`, `shared/schemas/forms.ts`, `shared/utils/form-validator.ts`) dengan validasi ketat URL Google Docs, NIK 16-digit string, allowlist opsi, dan proteksi ReDoS.
+- Backend Google Docs Templates (`worker/modules/templates/`): import & ekstraksi placeholder via signed Apps Script, mapping placeholder, refresh versi baru, validasi + snapshot privat Google Docs, test generation PDF dummy tanpa nomor produksi, dan proteksi penghapusan template terpakai.
+- Backend Dynamic Forms & Event-Template Linking (`worker/modules/forms/`): versioning non-destruktif (`draft` → `published`), validasi regex aman, serta penautan template kegiatan.
+- Frontend Templates & Form Builder (`src/features/templates/`, `src/features/form-builder/`): `/admin/template`, `/admin/template/:id`, dan `/admin/kegiatan/:id/formulir` lengkap dengan preview formulir mobile-first.
+- Unit test `tests/unit/templates-forms.test.ts`.
+
 ## [0.4.0] - 2026-11-27 (Phase 3: Event Management)
 
 ### Added

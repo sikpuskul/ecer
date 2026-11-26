@@ -54,6 +54,7 @@
         "APP_TIMEZONE": "Asia/Jakarta",
         "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
         "ORGANIZATION_CODE": "PKM-SMK",
+        "GAS_WEB_APP_URL": "https://script.google.com/macros/s/AKfycby3qMoMu9jO7KW4iAyQ5-3bt8ud9ZhSngDrckkX1Xd0XtQbiMkPIpcRKycFoKfy8Nen/exec",
       },
     },
   },

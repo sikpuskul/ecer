@@ -6,6 +6,7 @@ import { apiNotFoundHandler, errorHandler } from './middleware/error-handler';
 import { requestIdMiddleware } from './middleware/request-id';
 import { securityHeadersMiddleware } from './middleware/security-headers';
 import { createAuthRoutes } from './modules/auth/routes';
+import { createIntegrationRoutes } from './modules/integration/routes';
 
 export const APP_VERSION = '0.1.0';
 
@@ -38,6 +39,7 @@ export function createApp() {
   });
 
   api.route('/auth', createAuthRoutes());
+  api.route('/admin/integration', createIntegrationRoutes());
 
   app.route(API_BASE_PATH, api);
   app.all('/api/*', apiNotFoundHandler);

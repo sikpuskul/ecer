@@ -7,7 +7,7 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 | Fase         | Nama                                                         | Status                                                                     |
 | ------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | **Phase 0**  | Project Foundation                                           | Selesai                                                                    |
-| **Phase 1**  | Security & Google Integration Feasibility _(Technical Gate)_ | Selesai (kode & uji lokal; uji live staging menunggu setup Cloudflare/GAS) |
+| **Phase 1**  | Security & Google Integration Feasibility _(Technical Gate)_ | Selesai (lolos uji live staging Workers Free + D1 + GAS) |
 | **Phase 2**  | Database & Core Admin                                        | Menunggu persetujuan                                                       |
 | **Phase 3**  | Event Management                                             | Belum dimulai                                                              |
 | **Phase 4**  | Templates & Dynamic Forms                                    | Belum dimulai                                                              |
@@ -45,7 +45,7 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 - [x] Scaffold modular `apps-script/` (`Main.gs`, `Auth.gs`, `Response.gs`, `Config.gs`, `Utils.gs`, `DriveService.gs`, `TemplateService.gs`, `PlaceholderService.gs`, `QrService.gs`, `JobRegistry.gs`, `DocumentService.gs`, `EmailService.gs`)
 - [x] Unit & integration tests untuk kriptografi, auth/CSRF/session expiry, serta mock integrasi Apps Script (`tests/unit/security.test.ts`, `tests/unit/gas-integration.test.ts`, `tests/integration/auth.test.ts`)
 - [x] Panduan setup GitHub, Cloudflare Staging, dan Google Apps Script di `docs/DEPLOYMENT.md`
-- [ ] _(Live Staging Gate)_ Eksekusi smoke test live ke staging Worker + Apps Script setelah akun Cloudflare & Google Apps Script staging selesai dikonfigurasi pemilik proyek
+- [x] _(Live Staging Gate)_ Lolos uji live di `https://ecer-staging.siksumakul.workers.dev`: PBKDF2 100k login + `__Host-ecer_session` cookie + signed HMAC-SHA256 Worker → Google Apps Script (`health`, `remainingEmailQuota: 100`)
 
 ---
 

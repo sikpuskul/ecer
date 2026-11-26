@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { ApiClientError, loginAdminApi } from '@/lib/api-client';
+import { ApiClientError, fetchPublicConfig, loginAdminApi } from '@/lib/api-client';
 
 declare global {
   interface Window {
@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+const BUILD_TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
 
 export function AdminLoginPage() {
   const [username, setUsername] = useState('');
@@ -36,12 +36,20 @@ export function AdminLoginPage() {
   const location = useLocation();
   const queryClient = useQueryClient();
 
+  const publicConfigQuery = useQuery({
+    queryKey: ['public', 'config'],
+    queryFn: fetchPublicConfig,
+    staleTime: 5 * 60_000,
+  });
+
+  const turnstileSiteKey = publicConfigQuery.data?.turnstileSiteKey ?? BUILD_TURNSTILE_SITE_KEY;
+
   const redirectTo = (location.state as { from?: string } | null)?.from?.startsWith('/admin')
     ? (location.state as { from: string }).from
     : '/admin';
 
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || !turnstileContainerRef.current) {
+    if (!turnstileSiteKey || !turnstileContainerRef.current) {
       return;
     }
 
@@ -51,7 +59,7 @@ export function AdminLoginPage() {
       if (turnstileWidgetIdRef.current) return;
 
       turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
+        sitekey: turnstileSiteKey,
         callback: (token) => setTurnstileToken(token),
         'expired-callback': () => setTurnstileToken(undefined),
         'error-callback': () => setTurnstileToken(undefined),
@@ -83,7 +91,7 @@ export function AdminLoginPage() {
         turnstileWidgetIdRef.current = undefined;
       }
     };
-  }, []);
+  }, [turnstileSiteKey]);
 
   const loginMutation = useMutation({
     mutationFn: loginAdminApi,
@@ -206,7 +214,7 @@ export function AdminLoginPage() {
               />
             </div>
 
-            {TURNSTILE_SITE_KEY && (
+            {turnstileSiteKey && (
               <div className="pt-1">
                 <div ref={turnstileContainerRef} />
               </div>

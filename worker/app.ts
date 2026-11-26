@@ -42,6 +42,24 @@ export function createApp() {
     return c.json(body, 200);
   });
 
+  api.get('/public/config', (c) => {
+    const requestId = c.get('requestId');
+    c.header('Cache-Control', 'public, max-age=60');
+    return c.json(
+      {
+        success: true as const,
+        data: {
+          appName: c.env.APP_NAME ?? 'ECER',
+          organizationName: c.env.ORGANIZATION_NAME ?? 'Puskesmas Sumbermanjing Kulon',
+          timezone: c.env.APP_TIMEZONE ?? 'Asia/Jakarta',
+          turnstileSiteKey: c.env.TURNSTILE_SITE_KEY ?? null,
+        },
+        requestId,
+      },
+      200,
+    );
+  });
+
   api.route('/auth', createAuthRoutes());
   api.route('/admin/dashboard', createDashboardRoutes());
   api.route('/admin/users', createUsersRoutes());

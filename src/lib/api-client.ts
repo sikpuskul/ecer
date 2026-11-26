@@ -93,6 +93,18 @@ export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse>
   return parsed.data;
 }
 
+export interface PublicRuntimeConfig {
+  appName: string;
+  organizationName: string;
+  timezone: string;
+  turnstileSiteKey: string | null;
+}
+
+export async function fetchPublicConfig(): Promise<PublicRuntimeConfig> {
+  const res = await apiRequest<PublicRuntimeConfig>('/public/config');
+  return res.data;
+}
+
 export async function loginAdminApi(input: LoginRequest): Promise<AdminProfile> {
   const res = await apiRequest<{ admin: AdminProfile }>('/auth/login', {
     method: 'POST',

@@ -8,11 +8,13 @@ import { securityHeadersMiddleware } from './middleware/security-headers';
 import { createAuditRoutes } from './modules/audit/routes';
 import { createAuthRoutes } from './modules/auth/routes';
 import { createDashboardRoutes } from './modules/dashboard/routes';
+import { createEventsRoutes } from './modules/events/routes';
 import { createIntegrationRoutes } from './modules/integration/routes';
 import { createCategoriesRoutes, createSettingsRoutes } from './modules/settings/routes';
+import { createAdminStorageRoutes, createPublicAssetRoutes } from './modules/storage/routes';
 import { createUsersRoutes } from './modules/users/routes';
 
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 
 export function createApp() {
   const app = new Hono<AppEnv>();
@@ -60,8 +62,11 @@ export function createApp() {
     );
   });
 
+  api.route('/public/assets', createPublicAssetRoutes());
   api.route('/auth', createAuthRoutes());
   api.route('/admin/dashboard', createDashboardRoutes());
+  api.route('/admin/events', createEventsRoutes());
+  api.route('/admin/storage', createAdminStorageRoutes());
   api.route('/admin/users', createUsersRoutes());
   api.route('/admin/settings', createSettingsRoutes());
   api.route('/admin/categories', createCategoriesRoutes());

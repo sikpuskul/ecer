@@ -2,6 +2,16 @@
 
 Seluruh perubahan penting pada proyek ECER dicatat pada berkas ini.
 
+## [0.4.0] - 2026-11-27 (Phase 3: Event Management)
+
+### Added
+
+- Shared event schemas & pure real-time status/eligibility engine (`shared/schemas/events.ts`, `shared/utils/event-status.ts`) mengikuti aturan interval `start_at <= now < end_at` dan override penutupan manual.
+- Backend Event Management (`worker/modules/events/`): CRUD kegiatan, hashing PIN kehadiran, validasi checklist sebelum publikasi, lifecycle (`publish`, `close`, `reopen`, `archive`), duplikasi aman (selalu draft tanpa menyalin PIN/peserta/dokumen), serta pembatasan hapus khusus draft kosong.
+- Backend Flyer Storage Cloudflare R2 (`worker/modules/storage/routes.ts`): upload JPEG/PNG/WebP maks 5 MiB dengan validasi magic bytes (menolak SVG), cleanup flyer terganti, dan proteksi flyer draft agar tidak bisa diakses publik.
+- Frontend Event Management (`src/features/events/`): halaman daftar kegiatan `/admin/kegiatan` (pencarian, filter kategori/status, kartu 16:9, duplikasi & hapus draft) dan editor bertab 5 bagian `/admin/kegiatan/baru` & `/admin/kegiatan/:id/edit` (unsaved changes warning, upload flyer, checklist publikasi, kontrol lifecycle).
+- Unit test `tests/unit/event-status.test.ts`.
+
 ## [0.3.0] - 2026-11-27 (Phase 2: Database & Core Admin)
 
 ### Added

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   FileClock,
@@ -24,6 +25,7 @@ interface NavItem {
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/kegiatan', label: 'Kegiatan', icon: CalendarDays },
   { to: '/admin/pengguna', label: 'Administrator', icon: Users },
   { to: '/admin/pengaturan', label: 'Pengaturan & Kategori', icon: Settings },
   { to: '/admin/audit-log', label: 'Audit Log', icon: FileClock },
@@ -31,6 +33,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
 
 const ROUTE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard Administrator',
+  '/admin/kegiatan': 'Manajemen Kegiatan',
+  '/admin/kegiatan/baru': 'Buat Kegiatan Baru',
   '/admin/pengguna': 'Manajemen Administrator',
   '/admin/pengaturan': 'Pengaturan & Kategori Kegiatan',
   '/admin/audit-log': 'Riwayat Audit Log',

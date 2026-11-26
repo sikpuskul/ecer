@@ -34,6 +34,18 @@ const AdminAuditLogPage = lazy(() =>
   })),
 );
 
+const AdminEventsListPage = lazy(() =>
+  import('@/features/events/pages/AdminEventsListPage').then((m) => ({
+    default: m.AdminEventsListPage,
+  })),
+);
+
+const AdminEventEditorPage = lazy(() =>
+  import('@/features/events/pages/AdminEventEditorPage').then((m) => ({
+    default: m.AdminEventEditorPage,
+  })),
+);
+
 function RouteLoadingFallback() {
   return (
     <div className="flex min-h-[40vh] items-center justify-center px-4">
@@ -51,6 +63,9 @@ export function AppRouter() {
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboardPage />} />
+            <Route path="kegiatan" element={<AdminEventsListPage />} />
+            <Route path="kegiatan/baru" element={<AdminEventEditorPage />} />
+            <Route path="kegiatan/:id/edit" element={<AdminEventEditorPage />} />
             <Route path="pengguna" element={<AdminUsersPage />} />
             <Route path="pengaturan" element={<AdminSettingsPage />} />
             <Route path="audit-log" element={<AdminAuditLogPage />} />

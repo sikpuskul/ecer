@@ -104,6 +104,18 @@ Memeriksa kesiapan runtime Cloudflare Worker dan konfigurasi dasar aplikasi (tan
 - `GET /api/v1/admin/categories`, `POST /api/v1/admin/categories`, `PATCH /api/v1/admin/categories/:id` — Manajemen kategori kegiatan.
 - `GET /api/v1/admin/audit-logs` — Riwayat audit log read-only terpaginasi (`page`, `limit`, filter `action` & `entityType`).
 - `GET /api/v1/admin/integration/gas-health` — Pemeriksaan kesehatan integrasi bertanda tangan Worker ↔ Google Apps Script.
+- `GET /api/v1/public/config` — Konfigurasi publik non-secret (`appName`, `organizationName`, `timezone`, `turnstileSiteKey`).
+
+### Event Management & Flyer Storage (`/api/v1/admin/events/*`, `/api/v1/admin/storage/*`) _(Phase 3)_
+
+- `GET /api/v1/admin/events` — Daftar kegiatan terpaginasi dengan filter `search`, `categoryId`, `status`.
+- `POST /api/v1/admin/events` — Buat draft kegiatan baru (PIN di-hash, tidak pernah dikembalikan).
+- `GET /api/v1/admin/events/:id` — Detail kegiatan + computed eligibility + `publishChecklist`.
+- `PATCH /api/v1/admin/events/:id` — Perbarui data kegiatan, PIN, periode, atau flyer (dengan cleanup flyer lama di R2).
+- `DELETE /api/v1/admin/events/:id` — Hapus draft kegiatan (ditolak jika bukan draft atau sudah memiliki peserta/dokumen).
+- `POST /api/v1/admin/events/:id/publish`, `close`, `reopen`, `archive`, `duplicate` — Kontrol lifecycle & duplikasi (hasil duplikasi selalu `draft` tanpa menyalin PIN lama).
+- `POST /api/v1/admin/storage/flyer`, `DELETE /api/v1/admin/storage/flyer/*` — Upload & hapus flyer R2 (JPEG/PNG/WebP maks. 5 MiB dengan validasi magic bytes, menolak SVG).
+- `GET /api/v1/public/assets/flyers/*` — Melayani flyer kegiatan terpublikasi (flyer draft diblokir untuk publik).
 
 ### Fallback API tidak dikenal (`ALL /api/*`)
 

@@ -480,6 +480,23 @@ export async function regenerateDocument(
     );
   }
 
+  const latestTplRow = await db
+    .prepare(
+      `SELECT COALESCE(
+         (SELECT et.template_version_id FROM event_templates et WHERE et.id = ?1 LIMIT 1),
+         (SELECT tv2.id FROM template_versions tv1
+          INNER JOIN template_versions tv2 ON tv2.template_id = tv1.template_id
+          WHERE tv1.id = ?2
+          ORDER BY tv2.version_number DESC LIMIT 1),
+         ?2
+       ) AS target_template_version_id`,
+    )
+    .bind(doc.event_template_id, doc.template_version_id)
+    .first<{ target_template_version_id: string }>();
+
+  const targetTemplateVersionId =
+    latestTplRow?.target_template_version_id ?? doc.template_version_id;
+
   const maxRevRow = await db
     .prepare(
       `SELECT COALESCE(MAX(revision_number), 0) AS max_rev FROM document_revisions WHERE document_id = ?1`,
@@ -503,6 +520,9 @@ export async function regenerateDocument(
 
   await db.batch([
     db
+      .prepare(`UPDATE documents SET template_version_id = ?2, updated_at = ?3 WHERE id = ?1`)
+      .bind(doc.id, targetTemplateVersionId, nowIso),
+    db
       .prepare(
         `INSERT INTO document_revisions (
           id, document_id, revision_number, template_version_id, data_snapshot_encrypted,
@@ -514,7 +534,7 @@ export async function regenerateDocument(
         revisionId,
         doc.id,
         nextRevision,
-        doc.template_version_id,
+        targetTemplateVersionId,
         doc.recipient_data_encrypted,
         filename,
         params.adminId,

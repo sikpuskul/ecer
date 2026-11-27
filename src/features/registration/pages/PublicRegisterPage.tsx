@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AlertCircle, ArrowLeft, CheckCircle2, Copy } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { validateDynamicSubmission } from '@shared/utils/form-validator';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
 import { ApiClientError, fetchPublicConfig } from '@/lib/api-client';
 import {
   fetchPublicEventForm,
@@ -16,11 +17,9 @@ export function PublicRegisterPage() {
   const [attendancePin, setAttendancePin] = useState('');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const [turnstileResetCount, setTurnstileResetCount] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-
-  const turnstileRef = useRef<HTMLDivElement | null>(null);
-  const widgetIdRef = useRef<string | undefined>(undefined);
 
   const configQuery = useQuery({
     queryKey: ['public', 'config'],
@@ -36,46 +35,6 @@ export function PublicRegisterPage() {
 
   const turnstileSiteKey = configQuery.data?.turnstileSiteKey ?? null;
 
-  useEffect(() => {
-    if (!turnstileSiteKey || !turnstileRef.current) return;
-    let cancelled = false;
-    const render = () => {
-      if (cancelled || !turnstileRef.current || !window.turnstile || widgetIdRef.current) return;
-      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-        sitekey: turnstileSiteKey,
-        callback: (token) => setTurnstileToken(token),
-        'expired-callback': () => setTurnstileToken(undefined),
-        'error-callback': () => setTurnstileToken(undefined),
-      });
-    };
-
-    if (window.turnstile) {
-      render();
-    } else {
-      const existing = document.querySelector<HTMLScriptElement>(
-        'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
-      );
-      if (existing) {
-        existing.addEventListener('load', render, { once: true });
-      } else {
-        const script = document.createElement('script');
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-        script.async = true;
-        script.defer = true;
-        script.addEventListener('load', render, { once: true });
-        document.head.appendChild(script);
-      }
-    }
-
-    return () => {
-      cancelled = true;
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = undefined;
-      }
-    };
-  }, [turnstileSiteKey]);
-
   const registerMutation = useMutation({
     mutationFn: () =>
       registerPublicParticipantApi(slug!, {
@@ -90,10 +49,7 @@ export function PublicRegisterPage() {
           ? err.message
           : 'Gagal mengirim data. Data yang Anda ketik tetap aman, silakan coba lagi.',
       );
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.reset(widgetIdRef.current);
-        setTurnstileToken(undefined);
-      }
+      setTurnstileResetCount((c) => c + 1);
     },
   });
 
@@ -349,7 +305,13 @@ export function PublicRegisterPage() {
               </label>
             </div>
 
-            {turnstileSiteKey && <div ref={turnstileRef} />}
+            {turnstileSiteKey && (
+              <TurnstileWidget
+                siteKey={turnstileSiteKey}
+                onToken={setTurnstileToken}
+                resetCounter={turnstileResetCount}
+              />
+            )}
 
             <button
               type="submit"

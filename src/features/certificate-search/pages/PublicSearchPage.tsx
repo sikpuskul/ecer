@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   AlertCircle,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { formatJakartaDate } from '@shared/utils/jakarta-date';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
 import { ApiClientError, fetchPublicConfig } from '@/lib/api-client';
 import {
   fetchPublicEventDetail,
@@ -51,11 +52,9 @@ export function PublicSearchPage() {
   const [method, setMethod] = useState<'recovery_code' | 'email_otp'>('recovery_code');
   const [code, setCode] = useState('');
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const [turnstileResetCount, setTurnstileResetCount] = useState(0);
   const [otpFeedback, setOtpFeedback] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  const turnstileRef = useRef<HTMLDivElement | null>(null);
-  const widgetIdRef = useRef<string | undefined>(undefined);
 
   const configQuery = useQuery({
     queryKey: ['public', 'config'],
@@ -71,51 +70,8 @@ export function PublicSearchPage() {
 
   const turnstileSiteKey = configQuery.data?.turnstileSiteKey ?? null;
 
-  useEffect(() => {
-    if (!turnstileSiteKey || !turnstileRef.current) return;
-    let cancelled = false;
-    const render = () => {
-      if (cancelled || !turnstileRef.current || !window.turnstile || widgetIdRef.current) return;
-      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-        sitekey: turnstileSiteKey,
-        callback: (token) => setTurnstileToken(token),
-        'expired-callback': () => setTurnstileToken(undefined),
-        'error-callback': () => setTurnstileToken(undefined),
-      });
-    };
-
-    if (window.turnstile) {
-      render();
-    } else {
-      const existing = document.querySelector<HTMLScriptElement>(
-        'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
-      );
-      if (existing) {
-        existing.addEventListener('load', render, { once: true });
-      } else {
-        const script = document.createElement('script');
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-        script.async = true;
-        script.defer = true;
-        script.addEventListener('load', render, { once: true });
-        document.head.appendChild(script);
-      }
-    }
-
-    return () => {
-      cancelled = true;
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = undefined;
-      }
-    };
-  }, [turnstileSiteKey]);
-
   const resetTurnstile = () => {
-    if (widgetIdRef.current && window.turnstile) {
-      window.turnstile.reset(widgetIdRef.current);
-      setTurnstileToken(undefined);
-    }
+    setTurnstileResetCount((c) => c + 1);
   };
 
   const otpMutation = useMutation({
@@ -441,9 +397,11 @@ export function PublicSearchPage() {
           </div>
 
           {turnstileSiteKey && (
-            <div>
-              <div ref={turnstileRef} />
-            </div>
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              onToken={setTurnstileToken}
+              resetCounter={turnstileResetCount}
+            />
           )}
 
           {errorMsg && (

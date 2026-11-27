@@ -2,6 +2,13 @@
 
 Seluruh perubahan penting pada proyek ECER dicatat pada berkas ini.
 
+## [1.0.0] - 2026-11-27 (Phase 12: Staging & Production Release)
+
+### Added & Released
+
+- Konfigurasi Production penuh (`wrangler.jsonc` `env.production`): Cloudflare D1 `ecer-prod`, R2 `ecer-flyers-prod`, Custom Domain `https://cert.puskul.web.id`, Cron Trigger `*/5 * * * *`, Cloudflare Turnstile Production, dan Google Apps Script Production terpisah.
+- Perbaikan hasil acceptance testing staging: komponen khusus `TurnstileWidget.tsx`, pencarian `unique_key_field`/`search_key_field` case-insensitive, hook penerbitan otomatis pada pendaftaran & persetujuan peserta, UI penautan template & penomoran di Form Builder, penimpaan otomatis file PDF revisi lama di Google Drive saat regenerate, serta CRUD lengkap (Tambah/Edit/Hapus) aturan penomoran dokumen.
+
 ## [0.12.0] - 2026-11-27 (Phase 11: Quality Assurance)
 
 ### Changed & Improved

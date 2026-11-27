@@ -18,7 +18,7 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 | **Phase 9**  | Awards (Piagam)                                              | Selesai                                                  |
 | **Phase 10** | Reports & Operations                                         | Selesai                                                  |
 | **Phase 11** | Quality Assurance                                            | Selesai                                                  |
-| **Phase 12** | Staging & Production Release                                 | Menunggu persetujuan                                     |
+| **Phase 12** | Staging & Production Release                                 | Selesai (`https://cert.puskul.web.id`)                   |
 
 ---
 

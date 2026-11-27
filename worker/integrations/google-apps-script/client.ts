@@ -17,7 +17,7 @@ import type { GasAction, GasClientConfig, GasResponseEnvelope } from './types';
 
 export const ALLOWED_GAS_HOSTS = new Set(['script.google.com', 'script.googleusercontent.com']);
 
-export const DEFAULT_MAX_PDF_BYTES = 2 * 1024 * 1024; // 2 MiB (PRD §15.3)
+export const DEFAULT_MAX_PDF_BYTES = 5 * 1024 * 1024; // 5 MiB safe cap for Workers Free & high-res templates
 const DEFAULT_TIMEOUT_MS = 25_000;
 const DEFAULT_MAX_RETRIES = 2;
 const MAX_REDIRECTS = 3;

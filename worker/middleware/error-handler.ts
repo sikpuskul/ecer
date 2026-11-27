@@ -2,6 +2,7 @@ import type { ErrorHandler, NotFoundHandler } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { ERROR_CODES, type ErrorCode } from '../../shared/constants/api';
 import type { AppEnv } from '../env';
+import { GasIntegrationError } from '../integrations/google-apps-script/client';
 
 export class AppError extends Error {
   readonly code: ErrorCode;
@@ -30,6 +31,24 @@ export const errorHandler: ErrorHandler<AppEnv> = (err, c) => {
         requestId,
       },
       err.status,
+    );
+  }
+
+  if (err instanceof GasIntegrationError) {
+    const status: ContentfulStatusCode =
+      err.code === ERROR_CODES.GENERATION_FAILED || err.code === ERROR_CODES.VALIDATION_ERROR
+        ? 422
+        : 502;
+    return c.json(
+      {
+        success: false as const,
+        error: {
+          code: err.code,
+          message: err.message,
+        },
+        requestId,
+      },
+      status,
     );
   }
 

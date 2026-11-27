@@ -193,7 +193,7 @@ describe('Phase 1 — Signed Google Apps Script Integration', () => {
     }
   });
 
-  it('validates PDF magic bytes and enforces 2 MiB size limit', () => {
+  it('validates PDF magic bytes and enforces 5 MiB size limit', () => {
     const validPdf = new TextEncoder().encode('%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF');
     const decoded = decodeAndValidatePdfBase64(bytesToBase64(validPdf));
     expect(decoded.byteLength).toBe(validPdf.byteLength);
@@ -201,7 +201,7 @@ describe('Phase 1 — Signed Google Apps Script Integration', () => {
     const notPdf = new TextEncoder().encode('<html>Not a PDF</html>');
     expect(() => decodeAndValidatePdfBase64(bytesToBase64(notPdf))).toThrow(/bukan berkas PDF/i);
 
-    const oversized = new Uint8Array(2 * 1024 * 1024 + 1024);
+    const oversized = new Uint8Array(5 * 1024 * 1024 + 1024);
     oversized.set([0x25, 0x50, 0x44, 0x46, 0x2d]);
     expect(() => decodeAndValidatePdfBase64(bytesToBase64(oversized))).toThrow(/melebihi batas/i);
   });

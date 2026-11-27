@@ -1,7 +1,7 @@
 /**
  * DriveService.gs — Pengelolaan folder & berkas Google Drive privat milik aplikasi.
  */
-var MAX_PDF_FETCH_BYTES = 2 * 1024 * 1024; // 2 MiB (PRD §15.3)
+var MAX_PDF_FETCH_BYTES = 5 * 1024 * 1024; // 5 MiB safe cap for high-res certificate PDFs
 
 function getOrCreateSubfolder_(parentFolder, name) {
   var safeName = String(name).replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -69,7 +69,7 @@ function handleFetchPdf_(payload) {
   var blob = file.getBlob();
   var bytes = blob.getBytes();
   if (bytes.length > MAX_PDF_FETCH_BYTES) {
-    throw new Error('GENERATION_FAILED:Ukuran PDF melebihi batas 2 MiB.');
+    throw new Error('GENERATION_FAILED:Ukuran PDF melebihi batas 5 MiB.');
   }
 
   return {

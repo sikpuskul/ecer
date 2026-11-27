@@ -79,8 +79,22 @@ export const CreateEventSchema = z.object({
   quota: z.number().int().min(1).max(10_000).nullable().optional(),
   attendanceMode: z.enum(ATTENDANCE_MODES).optional().default('open'),
   issuanceMode: z.enum(ISSUANCE_MODES).optional().default('auto'),
-  uniqueKeyField: z.string().trim().min(1).max(64).optional().default('nomor_peserta'),
-  searchKeyField: z.string().trim().min(1).max(64).optional().default('nomor_peserta'),
+  uniqueKeyField: z
+    .string()
+    .trim()
+    .min(1)
+    .max(64)
+    .transform((v) => v.toLowerCase())
+    .optional()
+    .default('nomor_peserta'),
+  searchKeyField: z
+    .string()
+    .trim()
+    .min(1)
+    .max(64)
+    .transform((v) => v.toLowerCase())
+    .optional()
+    .default('nomor_peserta'),
   eventPin: z.string().trim().min(4, 'PIN kegiatan minimal 4 karakter.').max(32).optional(),
   emailConfig: EventEmailConfigSchema.partial().optional(),
   retentionConfig: EventRetentionConfigSchema.partial().optional(),

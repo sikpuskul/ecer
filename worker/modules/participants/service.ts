@@ -97,6 +97,22 @@ function getRequiredCryptoKeys(env: WorkerEnv): { encryptionKey: string; lookupH
   };
 }
 
+function lookupFieldValue(sanitized: Record<string, unknown>, fieldKey: string): string {
+  const direct = sanitized[fieldKey];
+  if (direct !== undefined && direct !== null) return String(direct).trim();
+
+  const lowerTarget = fieldKey.trim().toLowerCase();
+  const lowerDirect = sanitized[lowerTarget];
+  if (lowerDirect !== undefined && lowerDirect !== null) return String(lowerDirect).trim();
+
+  for (const [k, v] of Object.entries(sanitized)) {
+    if (k.trim().toLowerCase() === lowerTarget && v !== undefined && v !== null) {
+      return String(v).trim();
+    }
+  }
+  return '';
+}
+
 export async function registerPublicParticipant(
   env: WorkerEnv,
   params: {
@@ -181,8 +197,8 @@ export async function registerPublicParticipant(
     throw new AppError(ERROR_CODES.VALIDATION_ERROR, firstMsg, 422);
   }
 
-  const uniqueRaw = String(validation.sanitized[eventRow.unique_key_field] ?? '').trim();
-  const searchRaw = String(validation.sanitized[eventRow.search_key_field] ?? uniqueRaw).trim();
+  const uniqueRaw = lookupFieldValue(validation.sanitized, eventRow.unique_key_field);
+  const searchRaw = lookupFieldValue(validation.sanitized, eventRow.search_key_field) || uniqueRaw;
   if (!uniqueRaw) {
     throw new AppError(
       ERROR_CODES.VALIDATION_ERROR,

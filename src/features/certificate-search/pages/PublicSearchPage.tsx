@@ -140,7 +140,7 @@ export function PublicSearchPage() {
   }
 
   const event = eventQuery.data;
-  const keyMeta = SEARCH_KEY_LABELS[event.searchKeyField] ?? {
+  const keyMeta = SEARCH_KEY_LABELS[event.searchKeyField.toLowerCase()] ?? {
     label: `Kunci Pencarian (${event.searchKeyField.toUpperCase()})`,
     placeholder: 'Masukkan data sesuai pendaftaran',
     inputMode: 'text' as const,

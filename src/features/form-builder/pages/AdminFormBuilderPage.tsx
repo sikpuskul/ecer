@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, ArrowLeft, Eye, Plus, Save, Send, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Eye, Link2, Plus, Save, Send, Trash2 } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { FORM_FIELD_TYPES, type FormField, type FormFieldType } from '@shared/schemas/forms';
 import { ApiClientError } from '@/lib/api-client';
-import { fetchEventForm, publishEventForm, saveEventFormDraft } from '@/features/templates/api';
+import { fetchNumberingRules } from '@/features/certificates/api';
+import {
+  fetchAdminTemplates,
+  fetchEventForm,
+  fetchEventTemplateLinks,
+  publishEventForm,
+  saveEventFormDraft,
+  saveEventTemplateLinks,
+} from '@/features/templates/api';
 
 function createDefaultFields(): FormField[] {
   return [
@@ -67,6 +75,8 @@ export function AdminFormBuilderPage() {
   const queryClient = useQueryClient();
   const [fields, setFields] = useState<FormField[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
+  const [selectedTplVersionId, setSelectedTplVersionId] = useState('');
+  const [selectedRuleId, setSelectedRuleId] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(
     null,
   );
@@ -75,6 +85,48 @@ export function AdminFormBuilderPage() {
     queryKey: ['admin', 'event-form', eventId],
     queryFn: () => fetchEventForm(eventId!),
     enabled: Boolean(eventId),
+  });
+
+  const linksQuery = useQuery({
+    queryKey: ['admin', 'event-templates', eventId],
+    queryFn: () => fetchEventTemplateLinks(eventId!),
+    enabled: Boolean(eventId),
+  });
+
+  const templatesQuery = useQuery({
+    queryKey: ['admin', 'templates'],
+    queryFn: fetchAdminTemplates,
+  });
+
+  const rulesQuery = useQuery({
+    queryKey: ['admin', 'numbering-rules'],
+    queryFn: fetchNumberingRules,
+  });
+
+  const saveLinksMutation = useMutation({
+    mutationFn: (
+      nextLinks: Array<{
+        templateVersionId: string;
+        numberingRuleId?: string;
+        categoryName: string;
+        sortOrder: number;
+        isActive: boolean;
+      }>,
+    ) => saveEventTemplateLinks(eventId!, nextLinks),
+    onSuccess: () => {
+      setFeedback({
+        type: 'success',
+        text: 'Tautan template dokumen & aturan penomoran berhasil disimpan.',
+      });
+      setSelectedTplVersionId('');
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'event-templates', eventId] });
+    },
+    onError: (err) => {
+      setFeedback({
+        type: 'error',
+        text: err instanceof ApiClientError ? err.message : 'Gagal menyimpan tautan template.',
+      });
+    },
   });
 
   useEffect(() => {
@@ -226,6 +278,138 @@ export function AdminFormBuilderPage() {
           <span>{feedback.text}</span>
         </div>
       )}
+
+      {/* Template & Numbering Rule Linking Section */}
+      <section className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-4">
+        <div>
+          <h2 className="flex items-center gap-2 text-base font-bold text-[var(--color-primary-forest)]">
+            <Link2 className="h-4 w-4" aria-hidden="true" />
+            <span>Template Dokumen &amp; Aturan Penomoran</span>
+          </h2>
+          <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
+            Tautkan minimal 1 template Sertifikat agar sistem dapat menerbitkan nomor dan PDF
+            otomatis untuk peserta.
+          </p>
+        </div>
+
+        {(linksQuery.data ?? []).length === 0 ? (
+          <p className="rounded-[var(--radius-md)] border border-[var(--color-warning)]/25 bg-[var(--color-warning-bg)] p-3 text-xs text-[var(--color-warning)]">
+            Belum ada template dokumen yang ditautkan pada kegiatan ini.
+          </p>
+        ) : (
+          <div className="divide-y divide-[var(--color-border)] rounded-[var(--radius-md)] border border-[var(--color-border)]">
+            {(linksQuery.data ?? []).map((link, idx) => {
+              const matchedTpl = (templatesQuery.data ?? []).find(
+                (t) => t.latestVersion?.id === link.templateVersionId,
+              );
+              const matchedRule = (rulesQuery.data ?? []).find(
+                (r) => r.id === link.numberingRuleId,
+              );
+              return (
+                <div
+                  key={link.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 text-xs"
+                >
+                  <div>
+                    <span className="font-semibold text-[var(--color-text-primary)]">
+                      {matchedTpl
+                        ? `${matchedTpl.name} (${matchedTpl.documentType})`
+                        : link.categoryName}
+                    </span>
+                    <span className="ml-2 text-[var(--color-text-secondary)]">
+                      Penomoran: {matchedRule ? matchedRule.name : link.numberingRuleId.slice(0, 8)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={saveLinksMutation.isPending}
+                    onClick={() => {
+                      const remaining = (linksQuery.data ?? [])
+                        .filter((_, i) => i !== idx)
+                        .map((item, i) => ({
+                          templateVersionId: item.templateVersionId,
+                          numberingRuleId: item.numberingRuleId,
+                          categoryName: item.categoryName,
+                          sortOrder: i,
+                          isActive: item.isActive,
+                        }));
+                      saveLinksMutation.mutate(remaining);
+                    }}
+                    className="inline-flex min-h-[32px] items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] px-2.5 text-xs font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)]"
+                  >
+                    <Trash2 className="h-3 w-3" aria-hidden="true" />
+                    <span>Lepas</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <select
+            value={selectedTplVersionId}
+            onChange={(e) => setSelectedTplVersionId(e.target.value)}
+            aria-label="Pilih template dokumen"
+            className="min-h-[40px] rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs"
+          >
+            <option value="">Pilih Template Google Docs...</option>
+            {(templatesQuery.data ?? [])
+              .filter((t) => Boolean(t.latestVersion))
+              .map((t) => (
+                <option key={t.id} value={t.latestVersion!.id}>
+                  {t.name} ({t.documentType === 'award' ? 'Piagam' : 'Sertifikat'} · v
+                  {t.latestVersion!.versionNumber})
+                </option>
+              ))}
+          </select>
+
+          <select
+            value={selectedRuleId}
+            onChange={(e) => setSelectedRuleId(e.target.value)}
+            aria-label="Pilih aturan penomoran"
+            className="min-h-[40px] rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs"
+          >
+            <option value="">Aturan Penomoran Default...</option>
+            {(rulesQuery.data ?? []).map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name} ({r.formatPattern})
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            disabled={saveLinksMutation.isPending || !selectedTplVersionId}
+            onClick={() => {
+              const tpl = (templatesQuery.data ?? []).find(
+                (t) => t.latestVersion?.id === selectedTplVersionId,
+              );
+              const existing = (linksQuery.data ?? []).map((item, i) => ({
+                templateVersionId: item.templateVersionId,
+                numberingRuleId: item.numberingRuleId,
+                categoryName: item.categoryName,
+                sortOrder: i,
+                isActive: item.isActive,
+              }));
+              saveLinksMutation.mutate([
+                ...existing,
+                {
+                  templateVersionId: selectedTplVersionId,
+                  numberingRuleId: selectedRuleId || undefined,
+                  categoryName: tpl?.name ?? 'Sertifikat',
+                  sortOrder: existing.length,
+                  isActive: true,
+                },
+              ]);
+            }}
+            className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[var(--radius-md)] bg-[var(--color-primary-green)] px-4 text-xs font-semibold text-[var(--color-surface)] hover:bg-[var(--color-primary-forest)] disabled:opacity-50"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Tautkan Template</span>
+          </button>
+        </div>
+      </section>
 
       {previewMode ? (
         <section className="mx-auto max-w-xl rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">

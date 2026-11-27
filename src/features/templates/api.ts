@@ -123,3 +123,33 @@ export function saveEventFormDraft(eventId: string, fields: FormField[]): Promis
 export function publishEventForm(eventId: string): Promise<FormVersionItem> {
   return req(`/admin/events/${eventId}/form/publish`, { method: 'POST' });
 }
+
+export interface EventTemplateLinkItem {
+  id: string;
+  eventId: string;
+  templateVersionId: string;
+  numberingRuleId: string;
+  categoryName: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export function fetchEventTemplateLinks(eventId: string): Promise<EventTemplateLinkItem[]> {
+  return req(`/admin/events/${eventId}/templates`);
+}
+
+export function saveEventTemplateLinks(
+  eventId: string,
+  templates: Array<{
+    templateVersionId: string;
+    numberingRuleId?: string;
+    categoryName: string;
+    sortOrder: number;
+    isActive: boolean;
+  }>,
+): Promise<EventTemplateLinkItem[]> {
+  return req(`/admin/events/${eventId}/templates`, {
+    method: 'PUT',
+    body: JSON.stringify({ templates }),
+  });
+}

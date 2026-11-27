@@ -352,6 +352,15 @@ export async function processGenerationJob(
 
     const doneIso = new Date().toISOString();
 
+    // Find previous Drive PDFs for this document so we can replace/trash old files in Google Drive
+    const oldRevisionsRes = await db
+      .prepare(
+        `SELECT id, drive_file_id FROM document_revisions
+         WHERE document_id = ?1 AND id != ?2 AND drive_file_id IS NOT NULL`,
+      )
+      .bind(jobDetail.document_id, jobDetail.revision_id)
+      .all<{ id: string; drive_file_id: string }>();
+
     await db.batch([
       db
         .prepare(
@@ -390,6 +399,21 @@ export async function processGenerationJob(
         )
         .bind(jobDetail.job_id, doneIso),
     ]);
+
+    // Trash old superseded PDF files in Google Drive so only the latest file remains
+    for (const oldRev of oldRevisionsRes.results ?? []) {
+      if (oldRev.drive_file_id && oldRev.drive_file_id !== result.driveFileId) {
+        try {
+          await gas.deleteManagedFile(oldRev.drive_file_id, requestId);
+          await db
+            .prepare(`UPDATE document_revisions SET drive_file_id = NULL WHERE id = ?1`)
+            .bind(oldRev.id)
+            .run();
+        } catch {
+          // Best-effort Drive cleanup; never roll back succeeded generation
+        }
+      }
+    }
 
     // Phase 8: Enqueue automatic certificate email if enabled for this event
     try {
@@ -480,18 +504,18 @@ export async function regenerateDocument(
     );
   }
 
+  // Always pick the latest version of the template (or latest active event_template for this event)
   const latestTplRow = await db
     .prepare(
       `SELECT COALESCE(
-         (SELECT et.template_version_id FROM event_templates et WHERE et.id = ?1 LIMIT 1),
          (SELECT tv2.id FROM template_versions tv1
           INNER JOIN template_versions tv2 ON tv2.template_id = tv1.template_id
-          WHERE tv1.id = ?2
+          WHERE tv1.id = ?1
           ORDER BY tv2.version_number DESC LIMIT 1),
-         ?2
+         ?1
        ) AS target_template_version_id`,
     )
-    .bind(doc.event_template_id, doc.template_version_id)
+    .bind(doc.template_version_id)
     .first<{ target_template_version_id: string }>();
 
   const targetTemplateVersionId =

@@ -169,7 +169,7 @@ export async function listEventTemplateLinks(
     .prepare(
       `SELECT id, event_id, template_version_id, numbering_rule_id, category_name, sort_order, is_active
        FROM event_templates
-       WHERE event_id = ?1
+       WHERE event_id = ?1 AND is_active = 1
        ORDER BY sort_order ASC`,
     )
     .bind(eventId)
@@ -205,7 +205,10 @@ export async function replaceEventTemplateLinks(
     isActive: boolean;
   }>,
 ): Promise<EventTemplateLinkItem[]> {
-  const statements = [db.prepare(`DELETE FROM event_templates WHERE event_id = ?1`).bind(eventId)];
+  // Soft-deactivate existing links first so foreign keys from already-issued documents are preserved
+  const statements: D1PreparedStatement[] = [
+    db.prepare(`UPDATE event_templates SET is_active = 0 WHERE event_id = ?1`).bind(eventId),
+  ];
 
   for (const link of links) {
     statements.push(

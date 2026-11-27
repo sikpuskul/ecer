@@ -149,7 +149,7 @@ export async function isNumberingRuleInUse(db: D1Database, id: string): Promise<
 
 export async function deleteNumberingRuleRecord(db: D1Database, id: string): Promise<void> {
   await db.batch([
-    db.prepare(`DELETE FROM numbering_counters WHERE numbering_rule_id = ?1`).bind(id),
+    db.prepare(`DELETE FROM numbering_counters WHERE rule_id = ?1`).bind(id),
     db.prepare(`DELETE FROM numbering_rules WHERE id = ?1`).bind(id),
   ]);
 }

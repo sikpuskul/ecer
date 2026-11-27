@@ -4,21 +4,21 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 
 ## Ringkasan Status
 
-| Fase         | Nama                                                         | Status                                                                     |
-| ------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| **Phase 0**  | Project Foundation                                           | Selesai                                                                    |
-| **Phase 1**  | Security & Google Integration Feasibility _(Technical Gate)_ | Selesai (kode & uji lokal; uji live staging menunggu setup Cloudflare/GAS) |
-| **Phase 2**  | Database & Core Admin                                        | Menunggu persetujuan                                                       |
-| **Phase 3**  | Event Management                                             | Belum dimulai                                                              |
-| **Phase 4**  | Templates & Dynamic Forms                                    | Belum dimulai                                                              |
-| **Phase 5**  | Public Interface & Participants                              | Belum dimulai                                                              |
-| **Phase 6**  | Document Generation                                          | Belum dimulai                                                              |
-| **Phase 7**  | PDF Delivery & Recovery                                      | Belum dimulai                                                              |
-| **Phase 8**  | Email Delivery                                               | Belum dimulai                                                              |
-| **Phase 9**  | Awards (Piagam)                                              | Belum dimulai                                                              |
-| **Phase 10** | Reports & Operations                                         | Belum dimulai                                                              |
-| **Phase 11** | Quality Assurance                                            | Belum dimulai                                                              |
-| **Phase 12** | Staging & Production Release                                 | Belum dimulai                                                              |
+| Fase         | Nama                                                         | Status                                                   |
+| ------------ | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **Phase 0**  | Project Foundation                                           | Selesai                                                  |
+| **Phase 1**  | Security & Google Integration Feasibility _(Technical Gate)_ | Selesai (lolos uji live staging Workers Free + D1 + GAS) |
+| **Phase 2**  | Database & Core Admin                                        | Selesai                                                  |
+| **Phase 3**  | Event Management                                             | Selesai                                                  |
+| **Phase 4**  | Templates & Dynamic Forms                                    | Selesai                                                  |
+| **Phase 5**  | Public Interface & Participants                              | Selesai                                                  |
+| **Phase 6**  | Document Generation                                          | Selesai                                                  |
+| **Phase 7**  | PDF Delivery & Recovery                                      | Selesai                                                  |
+| **Phase 8**  | Email Delivery                                               | Selesai                                                  |
+| **Phase 9**  | Awards (Piagam)                                              | Selesai                                                  |
+| **Phase 10** | Reports & Operations                                         | Selesai                                                  |
+| **Phase 11** | Quality Assurance                                            | Selesai                                                  |
+| **Phase 12** | Staging & Production Release                                 | Selesai (`https://cert.puskul.web.id`)                   |
 
 ---
 
@@ -45,7 +45,7 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 - [x] Scaffold modular `apps-script/` (`Main.gs`, `Auth.gs`, `Response.gs`, `Config.gs`, `Utils.gs`, `DriveService.gs`, `TemplateService.gs`, `PlaceholderService.gs`, `QrService.gs`, `JobRegistry.gs`, `DocumentService.gs`, `EmailService.gs`)
 - [x] Unit & integration tests untuk kriptografi, auth/CSRF/session expiry, serta mock integrasi Apps Script (`tests/unit/security.test.ts`, `tests/unit/gas-integration.test.ts`, `tests/integration/auth.test.ts`)
 - [x] Panduan setup GitHub, Cloudflare Staging, dan Google Apps Script di `docs/DEPLOYMENT.md`
-- [ ] _(Live Staging Gate)_ Eksekusi smoke test live ke staging Worker + Apps Script setelah akun Cloudflare & Google Apps Script staging selesai dikonfigurasi pemilik proyek
+- [x] _(Live Staging Gate)_ Lolos uji live di `https://ecer-staging.siksumakul.workers.dev`: PBKDF2 100k login + `__Host-ecer_session` cookie + signed HMAC-SHA256 Worker → Google Apps Script (`health`, `remainingEmailQuota: 100`)
 
 ---
 

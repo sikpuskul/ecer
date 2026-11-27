@@ -36,6 +36,11 @@ export function clearAdminSessionCookie(c: Context<AppEnv>): void {
 }
 
 export const requireAdminAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
+  const rawToken = getCookie(c, getSessionCookieName(c));
+  if (!rawToken) {
+    throw new AppError(ERROR_CODES.UNAUTHORIZED, 'Silakan login terlebih dahulu.', 401);
+  }
+
   const db = c.env.DB;
   if (!db) {
     throw new AppError(
@@ -43,11 +48,6 @@ export const requireAdminAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
       'Database belum dikonfigurasi pada runtime ini.',
       500,
     );
-  }
-
-  const rawToken = getCookie(c, getSessionCookieName(c));
-  if (!rawToken) {
-    throw new AppError(ERROR_CODES.UNAUTHORIZED, 'Silakan login terlebih dahulu.', 401);
   }
 
   const tokenHash = await sha256Hex(rawToken);

@@ -213,6 +213,21 @@ export class GoogleAppsScriptClient {
           );
         }
 
+        if (response.status >= 400) {
+          throw new GasIntegrationError(
+            `Google Apps Script menolak permintaan (HTTP ${response.status}). Periksa URL deployment dan izin Web App.`,
+            { retryable: false },
+          );
+        }
+
+        const contentType = response.headers.get('content-type') ?? '';
+        if (!contentType.toLowerCase().includes('json')) {
+          throw new GasIntegrationError(
+            `Google Apps Script mengembalikan respons non-JSON (HTTP ${response.status}, ${contentType || 'unknown'}). Pastikan Web App di-deploy dengan Execute as: Me dan Who has access: Anyone serta sudah diotorisasi.`,
+            { retryable: false },
+          );
+        }
+
         const rawJson: unknown = await response.json();
         const schema = createGasResponseSchema(params.dataSchema);
         const parsed = schema.safeParse(rawJson);
@@ -363,7 +378,7 @@ export class GoogleAppsScriptClient {
       to: string;
       subject: string;
       body: string;
-      driveFileId: string;
+      driveFileId?: string;
     },
     requestId: string,
   ) {

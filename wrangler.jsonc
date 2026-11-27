@@ -6,7 +6,7 @@
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*"],
   },
   "d1_databases": [
     {
@@ -22,26 +22,80 @@
       "bucket_name": "ecer-flyers-local",
     },
   ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "ecer-local",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "FLYER_BUCKET",
-      "bucket_name": "ecer-flyers-local"
-    }
-  ],
   "vars": {
     "APP_NAME": "ECER",
     "APP_BASE_URL": "http://localhost:5173",
     "APP_ENV": "development",
     "APP_TIMEZONE": "Asia/Jakarta",
     "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
-    "ORGANIZATION_CODE": "PKM-SMK"
-  }
+    "ORGANIZATION_CODE": "PKM-SMK",
+  },
+  "env": {
+    "staging": {
+      "name": "ecer-staging",
+      "triggers": {
+        "crons": ["*/5 * * * *"],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ecer-staging",
+          "database_id": "23d57e70-7075-41d4-8642-2a2bed097743",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FLYER_BUCKET",
+          "bucket_name": "ecer-flyers-staging",
+        },
+      ],
+      "vars": {
+        "APP_NAME": "ECER",
+        "APP_BASE_URL": "https://ecer-staging.siksumakul.workers.dev",
+        "APP_ENV": "staging",
+        "APP_TIMEZONE": "Asia/Jakarta",
+        "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
+        "ORGANIZATION_CODE": "PKM-SMK",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "GAS_WEB_APP_URL": "https://script.google.com/macros/s/AKfycby3qMoMu9jO7KW4iAyQ5-3bt8ud9ZhSngDrckkX1Xd0XtQbiMkPIpcRKycFoKfy8Nen/exec",
+      },
+    },
+    "production": {
+      "name": "ecer",
+      "routes": [
+        {
+          "pattern": "cert.puskul.web.id",
+          "custom_domain": true,
+        },
+      ],
+      "triggers": {
+        "crons": ["*/5 * * * *"],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "ecer-prod",
+          "database_id": "06f63b15-8c5e-478c-aa40-854fd9512017",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FLYER_BUCKET",
+          "bucket_name": "ecer-flyers-prod",
+        },
+      ],
+      "vars": {
+        "APP_NAME": "ECER",
+        "APP_BASE_URL": "https://cert.puskul.web.id",
+        "APP_ENV": "production",
+        "APP_TIMEZONE": "Asia/Jakarta",
+        "ORGANIZATION_NAME": "Puskesmas Sumbermanjing Kulon",
+        "ORGANIZATION_CODE": "PKM-SMK",
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAGVNTOkTDTrtUDdE",
+        "GAS_WEB_APP_URL": "https://script.google.com/macros/s/AKfycbx0fZ4jcv4XIet5Bv5m1phEof3LdWCG1Y6_6Rn3diUdwiCKod6SYLurDq2cL687zvYO/exec",
+      },
+    },
+  },
 }

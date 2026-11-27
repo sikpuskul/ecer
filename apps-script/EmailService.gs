@@ -15,7 +15,7 @@ function handleSendEmail_(payload) {
   var body = String(payload.body || '').trim();
   var driveFileId = String(payload.driveFileId || '').trim();
 
-  if (!jobId || !to || !subject || !body || !driveFileId) {
+  if (!jobId || !to || !subject || !body) {
     throw new Error('VALIDATION_ERROR:Parameter pengiriman email tidak lengkap.');
   }
 
@@ -24,17 +24,21 @@ function handleSendEmail_(payload) {
     throw new Error('EMAIL_QUOTA_EXCEEDED:Kuota email harian MailApp habis.');
   }
 
-  var file = DriveApp.getFileById(driveFileId);
-  if (!isFileInsideManagedRoot_(file)) {
-    throw new Error('FORBIDDEN:Lampiran PDF tidak berada dalam folder terkelola ECER.');
-  }
-
-  MailApp.sendEmail({
+  var mailOptions = {
     to: to,
     subject: subject,
     body: body,
-    attachments: [file.getAs(MimeType.PDF)],
-  });
+  };
+
+  if (driveFileId) {
+    var file = DriveApp.getFileById(driveFileId);
+    if (!isFileInsideManagedRoot_(file)) {
+      throw new Error('FORBIDDEN:Lampiran PDF tidak berada dalam folder terkelola ECER.');
+    }
+    mailOptions.attachments = [file.getAs(MimeType.PDF)];
+  }
+
+  MailApp.sendEmail(mailOptions);
 
   return {
     jobId: jobId,

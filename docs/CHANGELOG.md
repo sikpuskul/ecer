@@ -2,6 +2,75 @@
 
 Seluruh perubahan penting pada proyek ECER dicatat pada berkas ini.
 
+## [0.12.0] - 2026-11-27 (Phase 11: Quality Assurance)
+
+### Changed & Improved
+
+- **Aksesibilitas WCAG 2.2 AA & Responsivitas**: menambahkan skip-to-content link (`Lewati ke konten utama`), `id="main-content"`, target sentuh `min-h-[44px]` pada `src/layouts/PublicLayout.tsx`, serta `overflow-x: clip` pada `src/styles/index.css`.
+- **Optimasi Bundle Publik**: menerapkan lazy-loading pada rute `PublicRegisterPage`, `PublicSearchPage`, dan `PublicVerifyPage` di `src/app/router.tsx` serta menghapus file legacy Phase 0 yang tidak terpakai (`src/features/public-home/PublicHomePage.tsx`).
+- **Automated Security QA Matrix**: menambahkan `tests/unit/security-qa.test.ts` yang memverifikasi 16 endpoint admin terproteksi (`401`), header keamanan ketat + HSTS, serta penolakan CSRF Origin (`403`).
+- **Dokumentasi QA**: menambahkan laporan audit lengkap pada `docs/QA_REPORT.md`.
+
+## [0.11.0] - 2026-11-27 (Phase 10: Reports & Operations)
+
+### Added
+
+- Shared report & retention schemas + safe CSV exporter (`shared/schemas/reports.ts`, `shared/utils/csv-export.ts`): UTF-8 BOM, RFC-4180 escaping, dan mitigasi CSV formula injection (`'`).
+- Backend Reports & Retention Module (`worker/modules/reports/`): agregasi tahunan (`GET /api/v1/admin/reports/overview`), ekspor CSV aman (`GET /api/v1/admin/reports/export.csv`), dry-run retensi (`GET /api/v1/admin/reports/retention/dry-run`), dan pembersihan token/sesi kedaluwarsa (`POST /api/v1/admin/reports/retention/cleanup`) lengkap dengan audit log.
+- Admin UI Laporan & Retensi (`src/features/reports/pages/AdminReportsPage.tsx`, rute `/admin/laporan` lazy-loaded): 4 kartu KPI, grafik batang tren bulanan ringan (tanpa library chart eksternal), ringkasan kategori, daftar kegiatan, ekspor CSV, dan panel dry-run retensi.
+- Runbook operasional, backup D1 Time Travel, rotasi secret, dan respons insiden pada `docs/OPERATIONS.md`.
+- Unit & security test `tests/unit/reports-operations.test.ts`.
+
+## [0.10.0] - 2026-11-27 (Phase 9: Awards / Piagam)
+
+### Added
+
+- Shared schemas & safe CSV parser untuk piagam (`shared/schemas/awards.ts`, `shared/utils/csv-awards.ts`): batas maksimal 100 baris/batch, deteksi delimiter koma/titik koma, serta sanitasi anti formula injection (`=`, `+`, `-`, `@`, `\t`, `\r`).
+- Backend Awards Module (`worker/modules/awards/`): penerbitan piagam manual (`POST /api/v1/admin/awards`), bulk import (`POST /api/v1/admin/awards/bulk-import`), import idempoten dari peserta terdaftar (`POST /api/v1/admin/awards/import-participants`), daftar template piagam terhubung, dan daftar piagam terbit khusus admin (terpisah dari pencarian publik & statistik sertifikat bulanan).
+- Admin UI Manajemen Piagam (`src/features/awards/pages/AdminAwardsPage.tsx`, rute `/admin/piagam` lazy-loaded): 3 mode penerbitan (Manual, Import CSV dengan pratinjau validasi, Import dari Peserta), daftar piagam terbit lengkap dengan tautan verifikasi QR, unduh PDF, kirim email, regenerate, dan cabut.
+- Unit & security test `tests/unit/awards.test.ts`.
+
+## [0.9.0] - 2026-11-27 (Phase 8: Email Delivery)
+
+### Added
+
+- Shared email schemas & pure template renderer (`shared/schemas/email.ts`, `shared/utils/email-template.ts`): rendering placeholder email (`{{nama_lengkap}}`, `{{nama_kegiatan}}`, `{{nomor_dokumen}}`, `{{tanggal_kegiatan}}`, `{{penyelenggara}}`, `{{link_verifikasi}}`), sanitasi CRLF subjek email, masking email penerima, dan kalkulasi reset kuota `Asia/Jakarta`.
+- Durable Email Delivery Engine (`worker/modules/email/`): antrean idempoten `email_jobs` dengan atomic lease claim, dukungan embargo `email_release_at` & `embargoUntilDownloadStart`, penanganan otomatis kuota harian `MailApp` (`deferred_quota` dengan penjadwalan ulang otomatis di 00:10 WIB), backoff retry, serta manual resend oleh admin.
+- Integrasi otomatis pemicu email setelah penerbitan PDF sukses (`worker/modules/documents/service.ts`), pengiriman OTP email recovery aktual (`worker/modules/recovery/routes.ts`), dukungan email tanpa lampiran pada `apps-script/EmailService.gs`, dan pemrosesan batch antrean email pada Cron `scheduled` (`worker/index.ts`).
+- Admin UI Monitor Email (`src/features/email/pages/AdminEmailPage.tsx`, rute `/admin/email`) lengkap dengan indikator sisa kuota `MailApp`, filter status, aksi retry/batalkan, serta tombol **Kirim Email** pada `/admin/sertifikat`.
+- Unit & security test `tests/unit/email-delivery.test.ts`.
+
+## [0.8.0] - 2026-11-27 (Phase 7: PDF Delivery, Recovery & QR Verification)
+
+### Added
+
+- Utilitas masking nama penerima (`shared/utils/masking.ts`) dan shared schemas recovery/verifikasi (`shared/schemas/recovery.ts`).
+- Public Recovery & Private PDF Proxy API (`worker/modules/recovery/routes.ts`): pencarian anti-enumerasi (`POST /public/events/:slug/search`), verifikasi recovery code / OTP email (`POST /public/recovery/verify`), pengiriman ulang OTP dengan cooldown 60 detik & batas 5 percobaan (`POST /public/recovery/resend`), penerbitan temporary `download_grants` via cookie `HttpOnly` (`__Host-ecer_grant`, TTL 10 menit), serta proxy PDF privat dari Google Drive (`preview` & `download` dengan `Cache-Control: private, no-store` dan `X-Content-Type-Options: nosniff`).
+- Public QR Verification API (`worker/modules/verification/routes.ts`): `GET /public/verify/:verificationCode` dengan status `VALID` / `REVOKED` / `NOT_FOUND` / `UNAVAILABLE`, masking nama sesuai pengaturan aplikasi, dan header `X-Robots-Tag: noindex, nofollow`.
+- Admin PDF Download API (`GET /api/v1/admin/documents/:id/download`) dan tombol **Unduh PDF** pada halaman `/admin/sertifikat`.
+- Antarmuka Publik: halaman `/kegiatan/:slug/cari` (`PublicSearchPage`), halaman `/verifikasi/:verificationCode` (`PublicVerifyPage` dengan `<meta name="robots" content="noindex, nofollow">` dan disclaimer non-BSrE), serta tombol **Cari Sertifikat** pada kartu kegiatan di beranda (`/`).
+- Unit & security test `tests/unit/recovery-verify.test.ts`.
+
+## [0.7.0] - 2026-11-27 (Phase 6: Document Generation)
+
+### Added
+
+- Atomic Document Numbering Engine (`shared/schemas/numbering.ts`, `shared/utils/numbering.ts`, `worker/modules/numbering/`): token lengkap (`{SEQ}`, `{EVENT_CODE}`, `{DOC_TYPE}`, `{MONTH}`, `{MONTH_ROMAN}`, `{YEAR}`, `{ORG_CODE}`), strategi reset (`never`, `monthly`, `yearly`, `per_event`), dan increment atomik `INSERT ... ON CONFLICT DO UPDATE ... RETURNING`.
+- Local QR Code PNG Encoder (`worker/utils/qr-png.ts` berbasis `uqr` + native `CompressionStream('deflate')`) tanpa layanan QR eksternal.
+- Document Issuance, Durable Generation Jobs, Regeneration, Revocation & Cron Recovery (`worker/modules/documents/`, `worker/index.ts` `scheduled` handler): conditional atomic job claim dengan lease 2 menit, backoff retry, idempotency, regenerasi revisi (nomor & kode verifikasi tetap), serta pencabutan dokumen & download grants.
+- Frontend Admin UI: `/admin/penomoran`, `/admin/sertifikat`, dan `/admin/jobs` (lazy-loaded).
+- Unit test `tests/unit/numbering-qr.test.ts`.
+
+## [0.6.0] - 2026-11-27 (Phase 5: Public Interface & Participants)
+
+### Added
+
+- Utilitas kalender `Asia/Jakarta` (`shared/utils/jakarta-date.ts`) dengan navigasi bulan/tahun lintas tahun (Des → Jan) dan konversi rentang bulan ke UTC.
+- Public REST API (`worker/modules/public/routes.ts`): `/public/dashboard`, `/public/events`, `/public/events/:slug`, `/public/events/:slug/form`, dan `POST /public/events/:slug/register` lengkap dengan penegakan periode server-side, Turnstile, PIN/Whitelist, enkripsi AES-GCM PII, keyed HMAC duplicate prevention anti-enumerasi, kuota, dan 128-bit recovery code.
+- Admin Participants & Whitelist API (`worker/modules/participants/`): daftar peserta terdekripsi, approve/reject/cancel, dan manajemen whitelist kehadiran.
+- Antarmuka Publik (_Modern Healthcare Editorial_, mobile-first dari 320px): `PublicLayout`, `PublicDashboardPage` (`/`), `PublicRegisterPage` (`/kegiatan/:slug/daftar`), serta `AdminParticipantsPage` (`/admin/kegiatan/:id/peserta`).
+- Unit test `tests/unit/jakarta-date.test.ts`.
+
 ## [0.5.0] - 2026-11-27 (Phase 4: Templates & Dynamic Forms)
 
 ### Added

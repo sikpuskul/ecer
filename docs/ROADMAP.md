@@ -11,14 +11,14 @@ Pelacak progres resmi berdasarkan `PRD.md` §38. Setiap fase dijalankan secara b
 | **Phase 2**  | Database & Core Admin                                        | Selesai                                                  |
 | **Phase 3**  | Event Management                                             | Selesai                                                  |
 | **Phase 4**  | Templates & Dynamic Forms                                    | Selesai                                                  |
-| **Phase 5**  | Public Interface & Participants                              | Menunggu persetujuan                                     |
-| **Phase 6**  | Document Generation                                          | Belum dimulai                                            |
-| **Phase 7**  | PDF Delivery & Recovery                                      | Belum dimulai                                            |
-| **Phase 8**  | Email Delivery                                               | Belum dimulai                                            |
-| **Phase 9**  | Awards (Piagam)                                              | Belum dimulai                                            |
-| **Phase 10** | Reports & Operations                                         | Belum dimulai                                            |
-| **Phase 11** | Quality Assurance                                            | Belum dimulai                                            |
-| **Phase 12** | Staging & Production Release                                 | Belum dimulai                                            |
+| **Phase 5**  | Public Interface & Participants                              | Selesai                                                  |
+| **Phase 6**  | Document Generation                                          | Selesai                                                  |
+| **Phase 7**  | PDF Delivery & Recovery                                      | Selesai                                                  |
+| **Phase 8**  | Email Delivery                                               | Selesai                                                  |
+| **Phase 9**  | Awards (Piagam)                                              | Selesai                                                  |
+| **Phase 10** | Reports & Operations                                         | Selesai                                                  |
+| **Phase 11** | Quality Assurance                                            | Selesai                                                  |
+| **Phase 12** | Staging & Production Release                                 | Menunggu persetujuan                                     |
 
 ---
 

@@ -378,7 +378,7 @@ export class GoogleAppsScriptClient {
       to: string;
       subject: string;
       body: string;
-      driveFileId: string;
+      driveFileId?: string;
     },
     requestId: string,
   ) {

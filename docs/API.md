@@ -124,6 +124,20 @@ Memeriksa kesiapan runtime Cloudflare Worker dan konfigurasi dasar aplikasi (tan
 - `GET /api/v1/admin/events/:id/form`, `PUT /api/v1/admin/events/:id/form`, `POST /api/v1/admin/events/:id/form/publish` — Dynamic form builder dengan versioning non-destruktif dan proteksi ReDoS.
 - `GET/PUT /api/v1/admin/events/:id/templates` — Penautan versi template tervalidasi ke kegiatan.
 
+### Public Dashboard, Registration & Participants (`/api/v1/public/*`, `/api/v1/admin/participants/*`) _(Phase 5)_
+
+- `GET /api/v1/public/dashboard?month=&year=` — 3 indikator statistik bulanan (`Asia/Jakarta`, tanpa piagam) + daftar kategori aktif.
+- `GET /api/v1/public/events?month=&year=&search=&categoryId=&status=` — Daftar kegiatan non-draft beririsan dengan bulan terpilih + real-time eligibility.
+- `GET /api/v1/public/events/:slug` & `GET /api/v1/public/events/:slug/form` — Detail kegiatan + skema formulir aktif terpublikasi.
+- `POST /api/v1/public/events/:slug/register` — Pendaftaran peserta (validasi periode, kuota, Turnstile, PIN/Whitelist, skema dinamis bersama, enkripsi AES-GCM PII, keyed HMAC duplicate prevention anti-enumerasi, dan 128-bit recovery code).
+- `GET /api/v1/admin/events/:id/participants`, `POST /api/v1/admin/participants/:id/{approve,reject,cancel}`, `GET/POST /api/v1/admin/events/:id/whitelist` — Manajemen peserta, persetujuan manual, dan whitelist kehadiran.
+
+### Document Numbering, Issuance & Generation Jobs (`/api/v1/admin/numbering/*`, `/admin/documents/*`, `/admin/jobs/*`) _(Phase 6)_
+
+- `GET/POST /api/v1/admin/numbering`, `PATCH /api/v1/admin/numbering/:id`, `POST /api/v1/admin/numbering/preview` — Aturan penomoran atomik (`INSERT ... ON CONFLICT ... RETURNING`) dan preview format.
+- `GET /api/v1/admin/documents`, `GET /api/v1/admin/documents/:id/revisions`, `POST /api/v1/admin/documents/:id/regenerate`, `POST /api/v1/admin/documents/:id/revoke` — Manajemen dokumen terbit, regenerasi revisi (nomor & kode verifikasi tetap), dan pencabutan dokumen.
+- `GET /api/v1/admin/jobs/generation`, `GET /api/v1/admin/jobs/summary`, `POST /api/v1/admin/jobs/generation/:id/{retry,cancel}` — Monitoring dan kontrol antrean durable generation jobs + Cron recovery handler.
+
 ### Fallback API tidak dikenal (`ALL /api/*`)
 
 Mengembalikan `404 Not Found` dalam format error JSON standar dengan kode `NOT_FOUND` (tidak pernah jatuh ke `index.html`).
@@ -133,5 +147,58 @@ Mengembalikan `404 Not Found` dalam format error JSON standar dengan kode `NOT_F
 Kontrak rinci tiap modul akan ditambahkan saat fase terkait diimplementasikan sesuai `PRD.md` §24:
 
 - **Auth (`/api/v1/auth/*`)**: `login`, `logout`, `me`, `change-password` _(Phase 1)_
-- **Public (`/api/v1/public/*`)**: `dashboard`, `events`, `events/:slug`, `events/:slug/form`, `register`, `search`, `recovery/verify`, `recovery/resend`, `submissions/:publicId/status`, `documents/:publicId/preview`, `documents/:publicId/download`, `verify/:verificationCode`, `assets/flyers/:assetId` _(Phase 5–7)_
-- **Admin (`/api/v1/admin/*`)**: `dashboard`, `events`, `templates`, `participants`, `documents`, `awards`, `jobs`, `numbering`, `storage/flyer`, `settings`, `categories`, `users`, `audit-logs`, `reports` _(Phase 2–10)_
+- **Public (`/api/v1/public/*`)**: `dashboard`, `events`, `events/:slug`, `events/:slug/form`, `register`, `search`, `recovery/verify`, `recovery/resend`, `submissions/:publicId/status`, `documents/:publicId/preview`, `documents/:publicId/download`, `verify/:verificationCode`, `assets/flyers/:assetId` _(Phase 5–7 — Terimplementasi)_
+- **Admin (`/api/v1/admin/*`)**: `dashboard`, `events`, `templates`, `participants`, `documents` (termasuk `GET /documents/:id/download`), `awards`, `jobs`, `numbering`, `storage/flyer`, `settings`, `categories`, `users`, `audit-logs`, `reports` _(Phase 2–10)_
+
+### Endpoint Phase 7 (PDF Delivery, Recovery & QR Verification)
+
+| Method | Path                                          | Akses                         | Deskripsi                                                                                    |
+| ------ | --------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- |
+| `POST` | `/api/v1/public/events/:slug/search`          | Publik + Turnstile            | Respon generik anti-enumerasi sebelum verifikasi kode pemulihan / OTP                        |
+| `POST` | `/api/v1/public/recovery/verify`              | Publik + Turnstile            | Verifikasi kunci pencarian + recovery code / OTP email → menerbitkan cookie `download_grant` |
+| `POST` | `/api/v1/public/recovery/resend`              | Publik + Turnstile (60s CD)   | Mengirim/menyiapkan OTP email 6 digit (TTL 5 menit, maks 5 percobaan)                        |
+| `GET`  | `/api/v1/public/documents/:publicId/preview`  | Publik (Cookie `grant` aktif) | Streaming PDF `inline` dari Drive privat (memvalidasi periode unduh & status dokumen)        |
+| `GET`  | `/api/v1/public/documents/:publicId/download` | Publik (Cookie `grant` aktif) | Streaming PDF `attachment` dari Drive privat (`Cache-Control: private, no-store`)            |
+| `GET`  | `/api/v1/public/verify/:verificationCode`     | Publik (`noindex, nofollow`)  | Verifikasi QR publik (`VALID` / `REVOKED` / `NOT_FOUND` / `UNAVAILABLE`, nama termasking)    |
+| `GET`  | `/api/v1/admin/documents/:id/download`        | Admin (`HttpOnly` session)    | Unduh PDF dokumen `ready` oleh admin (melampaui batas periode unduh publik)                  |
+
+### Endpoint Phase 7 (PDF Delivery, Recovery & QR Verification)
+
+| Method | Path                                          | Akses                         | Deskripsi                                                                                    |
+| ------ | --------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- |
+| `POST` | `/api/v1/public/events/:slug/search`          | Publik + Turnstile            | Respon generik anti-enumerasi sebelum verifikasi kode pemulihan / OTP                        |
+| `POST` | `/api/v1/public/recovery/verify`              | Publik + Turnstile            | Verifikasi kunci pencarian + recovery code / OTP email → menerbitkan cookie `download_grant` |
+| `POST` | `/api/v1/public/recovery/resend`              | Publik + Turnstile (60s CD)   | Mengirim/menyiapkan OTP email 6 digit (TTL 5 menit, maks 5 percobaan)                        |
+| `GET`  | `/api/v1/public/documents/:publicId/preview`  | Publik (Cookie `grant` aktif) | Streaming PDF `inline` dari Drive privat (memvalidasi periode unduh & status dokumen)        |
+| `GET`  | `/api/v1/public/documents/:publicId/download` | Publik (Cookie `grant` aktif) | Streaming PDF `attachment` dari Drive privat (`Cache-Control: private, no-store`)            |
+| `GET`  | `/api/v1/public/verify/:verificationCode`     | Publik (`noindex, nofollow`)  | Verifikasi QR publik (`VALID` / `REVOKED` / `NOT_FOUND` / `UNAVAILABLE`, nama termasking)    |
+| `GET`  | `/api/v1/admin/documents/:id/download`        | Admin (`HttpOnly` session)    | Unduh PDF dokumen `ready` oleh admin (melampaui batas periode unduh publik)                  |
+
+### Endpoint Phase 8 (Email Delivery & Monitor)
+
+| Method | Path                                       | Akses                      | Deskripsi                                                                        |
+| ------ | ------------------------------------------ | -------------------------- | -------------------------------------------------------------------------------- |
+| `GET`  | `/api/v1/admin/jobs/email/summary`         | Admin (`HttpOnly` session) | Ringkasan status `email_jobs` + sisa kuota harian `MailApp` dari Apps Script     |
+| `GET`  | `/api/v1/admin/jobs/email`                 | Admin (`HttpOnly` session) | Daftar paginasi `email_jobs` dengan alamat email termasking dan filter status    |
+| `POST` | `/api/v1/admin/jobs/email/:id/retry`       | Admin + CSRF Origin        | Mengulang `email_job` (`failed`, `retry_wait`, `deferred_quota`, `needs_review`) |
+| `POST` | `/api/v1/admin/jobs/email/:id/cancel`      | Admin + CSRF Origin        | Membatalkan `email_job` yang masih tertunda                                      |
+| `POST` | `/api/v1/admin/documents/:id/resend-email` | Admin + CSRF Origin        | Mengirim ulang email sertifikat secara manual untuk dokumen berstatus `ready`    |
+
+### Endpoint Phase 9 (Awards / Piagam)
+
+| Method | Path                                       | Akses                      | Deskripsi                                                                       |
+| ------ | ------------------------------------------ | -------------------------- | ------------------------------------------------------------------------------- |
+| `GET`  | `/api/v1/admin/awards/templates`           | Admin (`HttpOnly` session) | Daftar kegiatan & template aktif bertipe `award` untuk form penerbitan piagam   |
+| `GET`  | `/api/v1/admin/awards`                     | Admin (`HttpOnly` session) | Daftar paginasi piagam terbit (`document_type = 'award'`) dengan filter status  |
+| `POST` | `/api/v1/admin/awards`                     | Admin + CSRF Origin        | Penerbitan piagam manual satuan (otomatis penomoran & antrean PDF)              |
+| `POST` | `/api/v1/admin/awards/bulk-import`         | Admin + CSRF Origin        | Bulk import piagam hingga 100 baris/batch (sanitasi anti formula injection)     |
+| `POST` | `/api/v1/admin/awards/import-participants` | Admin + CSRF Origin        | Import & terbitkan piagam dari daftar peserta terdaftar pada kegiatan yang sama |
+
+### Endpoint Phase 10 (Reports & Retention Operations)
+
+| Method | Path                                      | Akses                      | Deskripsi                                                                       |
+| ------ | ----------------------------------------- | -------------------------- | ------------------------------------------------------------------------------- |
+| `GET`  | `/api/v1/admin/reports/overview?year=`    | Admin (`HttpOnly` session) | Agregasi tahunan kegiatan, peserta, sertifikat, piagam, tren bulanan & kategori |
+| `GET`  | `/api/v1/admin/reports/export.csv?year=`  | Admin (`HttpOnly` session) | Ekspor CSV aman (UTF-8 BOM, sanitasi anti formula injection) + audit log        |
+| `GET`  | `/api/v1/admin/reports/retention/dry-run` | Admin (`HttpOnly` session) | Pratinjau jumlah sesi, grant, OTP, replay nonce kedaluwarsa & revisi superseded |
+| `POST` | `/api/v1/admin/reports/retention/cleanup` | Admin + CSRF Origin        | Pembersihan aman token/sesi kedaluwarsa (tanpa menghapus dokumen/PDF)           |

@@ -284,12 +284,20 @@ export function AdminEventEditorPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           {isEditing && id && (
-            <Link
-              to={`/admin/kegiatan/${id}/formulir`}
-              className="inline-flex min-h-[40px] items-center rounded-[var(--radius-md)] border border-[var(--color-primary-green)] px-3.5 text-xs font-semibold text-[var(--color-primary-forest)] hover:bg-[var(--color-accent-mint)]"
-            >
-              Kelola Formulir Dinamis
-            </Link>
+            <>
+              <Link
+                to={`/admin/kegiatan/${id}/formulir`}
+                className="inline-flex min-h-[40px] items-center rounded-[var(--radius-md)] border border-[var(--color-primary-green)] px-3.5 text-xs font-semibold text-[var(--color-primary-forest)] hover:bg-[var(--color-accent-mint)]"
+              >
+                Kelola Formulir
+              </Link>
+              <Link
+                to={`/admin/kegiatan/${id}/peserta`}
+                className="inline-flex min-h-[40px] items-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 text-xs font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-canvas)]"
+              >
+                Kelola Peserta
+              </Link>
+            </>
           )}
           {isDirty && (
             <span className="inline-flex rounded-full bg-[var(--color-warning-bg)] px-3 py-1 text-xs font-medium text-[var(--color-warning)]">

@@ -13,8 +13,10 @@ import { csrfOriginMiddleware } from '../../middleware/csrf';
 import { AppError } from '../../middleware/error-handler';
 import { insertAuditLog } from '../auth/repository';
 import {
+  deleteNumberingRuleRecord,
   findNumberingRuleById,
   insertNumberingRule,
+  isNumberingRuleInUse,
   listNumberingRules,
   updateNumberingRuleRecord,
 } from './repository';
@@ -125,6 +127,41 @@ export function createNumberingRoutes() {
 
     const updated = await findNumberingRuleById(db, existing.id);
     return c.json({ success: true as const, data: updated, requestId }, 200);
+  });
+
+  numbering.delete('/:id', csrfOriginMiddleware, async (c) => {
+    const db = c.env.DB!;
+    const admin = c.get('admin')!;
+    const requestId = c.get('requestId');
+    const id = c.req.param('id');
+
+    const existing = await findNumberingRuleById(db, id);
+    if (!existing) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 'Aturan penomoran tidak ditemukan.', 404);
+    }
+
+    const inUse = await isNumberingRuleInUse(db, id);
+    if (inUse) {
+      throw new AppError(
+        ERROR_CODES.VALIDATION_ERROR,
+        'Aturan penomoran sudah digunakan oleh kegiatan atau dokumen sehingga tidak dapat dihapus.',
+        409,
+      );
+    }
+
+    await deleteNumberingRuleRecord(db, id);
+
+    await insertAuditLog(db, {
+      adminId: admin.id,
+      actorType: 'admin',
+      action: 'numbering_rule.delete',
+      entityType: 'numbering_rule',
+      entityId: id,
+      changeSummary: { name: existing.name },
+      requestId,
+    });
+
+    return c.json({ success: true as const, data: { deleted: true }, requestId }, 200);
   });
 
   numbering.post('/preview', csrfOriginMiddleware, async (c) => {

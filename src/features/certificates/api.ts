@@ -57,6 +57,22 @@ export async function createNumberingRule(
   ).data;
 }
 
+export async function updateNumberingRule(
+  id: string,
+  input: Partial<CreateNumberingRuleInput> & { isActive?: boolean },
+): Promise<NumberingRuleItem> {
+  return (
+    await req<NumberingRuleItem>(`/admin/numbering/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    })
+  ).data;
+}
+
+export async function deleteNumberingRule(id: string): Promise<void> {
+  await req(`/admin/numbering/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
 export async function previewNumberingRule(input: PreviewNumberingInput): Promise<string> {
   const res = await req<{ preview: string }>('/admin/numbering/preview', {
     method: 'POST',

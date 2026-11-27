@@ -133,6 +133,27 @@ export async function updateNumberingRuleRecord(
     .run();
 }
 
+export async function isNumberingRuleInUse(db: D1Database, id: string): Promise<boolean> {
+  const [tplRef, docRef] = await Promise.all([
+    db
+      .prepare(`SELECT 1 AS used FROM event_templates WHERE numbering_rule_id = ?1 LIMIT 1`)
+      .bind(id)
+      .first<{ used: number }>(),
+    db
+      .prepare(`SELECT 1 AS used FROM documents WHERE numbering_rule_id = ?1 LIMIT 1`)
+      .bind(id)
+      .first<{ used: number }>(),
+  ]);
+  return Boolean(tplRef || docRef);
+}
+
+export async function deleteNumberingRuleRecord(db: D1Database, id: string): Promise<void> {
+  await db.batch([
+    db.prepare(`DELETE FROM numbering_counters WHERE numbering_rule_id = ?1`).bind(id),
+    db.prepare(`DELETE FROM numbering_rules WHERE id = ?1`).bind(id),
+  ]);
+}
+
 /**
  * Atomically allocates the next document number using SQLite UPSERT ... RETURNING (PRD §14.4).
  * Never uses SELECT MAX + 1 and never reuses allocated numbers.

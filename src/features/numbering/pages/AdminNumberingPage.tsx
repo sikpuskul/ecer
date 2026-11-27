@@ -1,15 +1,21 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Hash, Plus } from 'lucide-react';
-import type { ResetStrategy } from '@shared/schemas/numbering';
+import { AlertCircle, Hash, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
+import type { NumberingRuleItem, ResetStrategy } from '@shared/schemas/numbering';
 import type { TemplateDocumentType } from '@shared/schemas/templates';
 import { formatDocumentNumber } from '@shared/utils/numbering';
 import { getCurrentJakartaMonthYear } from '@shared/utils/jakarta-date';
 import { ApiClientError } from '@/lib/api-client';
-import { createNumberingRule, fetchNumberingRules } from '@/features/certificates/api';
+import {
+  createNumberingRule,
+  deleteNumberingRule,
+  fetchNumberingRules,
+  updateNumberingRule,
+} from '@/features/certificates/api';
 
 export function AdminNumberingPage() {
   const queryClient = useQueryClient();
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [documentType, setDocumentType] = useState<TemplateDocumentType>('certificate');
   const [formatPattern, setFormatPattern] = useState('{SEQ}/SERT/{ORG_CODE}/{MONTH_ROMAN}/{YEAR}');
@@ -21,6 +27,30 @@ export function AdminNumberingPage() {
     null,
   );
 
+  function resetForm() {
+    setEditingId(null);
+    setName('');
+    setDocumentType('certificate');
+    setFormatPattern('{SEQ}/SERT/{ORG_CODE}/{MONTH_ROMAN}/{YEAR}');
+    setSequencePadding(3);
+    setStartingNumber(1);
+    setResetStrategy('yearly');
+    setOrganizationCode('PKM-SMK');
+  }
+
+  function startEdit(rule: NumberingRuleItem) {
+    setEditingId(rule.id);
+    setName(rule.name);
+    setDocumentType(rule.documentType);
+    setFormatPattern(rule.formatPattern);
+    setSequencePadding(rule.sequencePadding);
+    setStartingNumber(rule.startingNumber);
+    setResetStrategy(rule.resetStrategy);
+    setOrganizationCode(rule.organizationCode);
+    setFeedback(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const rulesQuery = useQuery({
     queryKey: ['admin', 'numbering'],
     queryFn: fetchNumberingRules,
@@ -29,7 +59,7 @@ export function AdminNumberingPage() {
   const createMutation = useMutation({
     mutationFn: createNumberingRule,
     onSuccess: () => {
-      setName('');
+      resetForm();
       setFeedback({ type: 'success', text: 'Aturan penomoran baru berhasil dibuat.' });
       void queryClient.invalidateQueries({ queryKey: ['admin', 'numbering'] });
     },
@@ -37,6 +67,42 @@ export function AdminNumberingPage() {
       setFeedback({
         type: 'error',
         text: err instanceof ApiClientError ? err.message : 'Gagal membuat aturan penomoran.',
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Parameters<typeof updateNumberingRule>[1];
+    }) => updateNumberingRule(id, payload),
+    onSuccess: () => {
+      resetForm();
+      setFeedback({ type: 'success', text: 'Aturan penomoran berhasil diperbarui.' });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'numbering'] });
+    },
+    onError: (err) => {
+      setFeedback({
+        type: 'error',
+        text: err instanceof ApiClientError ? err.message : 'Gagal memperbarui aturan penomoran.',
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteNumberingRule,
+    onSuccess: () => {
+      if (editingId) resetForm();
+      setFeedback({ type: 'success', text: 'Aturan penomoran berhasil dihapus.' });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'numbering'] });
+    },
+    onError: (err) => {
+      setFeedback({
+        type: 'error',
+        text: err instanceof ApiClientError ? err.message : 'Gagal menghapus aturan penomoran.',
       });
     },
   });
@@ -56,7 +122,7 @@ export function AdminNumberingPage() {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setFeedback(null);
-    createMutation.mutate({
+    const payload = {
       name: name.trim(),
       documentType,
       formatPattern: formatPattern.trim(),
@@ -64,7 +130,12 @@ export function AdminNumberingPage() {
       startingNumber,
       resetStrategy,
       organizationCode: organizationCode.trim(),
-    });
+    };
+    if (editingId) {
+      updateMutation.mutate({ id: editingId, payload });
+    } else {
+      createMutation.mutate(payload);
+    }
   }
 
   return (
@@ -98,7 +169,21 @@ export function AdminNumberingPage() {
       )}
 
       <section className="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6">
-        <h2 className="text-base font-semibold">Tambah Aturan Penomoran</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-base font-semibold">
+            {editingId ? 'Edit Aturan Penomoran' : 'Tambah Aturan Penomoran'}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex min-h-[34px] items-center gap-1 rounded-[var(--radius-md)] border border-[var(--color-border)] px-3 text-xs font-semibold hover:bg-[var(--color-canvas)]"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Batal Edit</span>
+            </button>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="num-name" className="block text-sm font-medium">
@@ -212,14 +297,23 @@ export function AdminNumberingPage() {
             </p>
           </div>
 
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 flex flex-wrap gap-2">
             <button
               type="submit"
-              disabled={createMutation.isPending}
+              disabled={createMutation.isPending || updateMutation.isPending}
               className="inline-flex min-h-[44px] items-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary-green)] px-4 text-sm font-semibold text-[var(--color-surface)] hover:bg-[var(--color-primary-forest)]"
             >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              <span>Simpan Aturan Penomoran</span>
+              {editingId ? (
+                <>
+                  <Save className="h-4 w-4" aria-hidden="true" />
+                  <span>Simpan Perubahan</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  <span>Simpan Aturan Penomoran</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -252,9 +346,32 @@ export function AdminNumberingPage() {
                     {rule.formatPattern}
                   </p>
                 </div>
-                <span className="text-xs text-[var(--color-text-secondary)]">
-                  {rule.documentType} · reset: {rule.resetStrategy}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    {rule.documentType} · reset: {rule.resetStrategy}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => startEdit(rule)}
+                    className="inline-flex min-h-[34px] items-center gap-1 rounded-[var(--radius-md)] border border-[var(--color-border)] px-2.5 text-xs font-semibold hover:bg-[var(--color-canvas)]"
+                  >
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => {
+                      if (window.confirm(`Hapus aturan penomoran "${rule.name}"?`)) {
+                        deleteMutation.mutate(rule.id);
+                      }
+                    }}
+                    className="inline-flex min-h-[34px] items-center gap-1 rounded-[var(--radius-md)] border border-[var(--color-border)] px-2.5 text-xs font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Hapus</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>

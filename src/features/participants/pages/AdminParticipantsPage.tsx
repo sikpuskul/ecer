@@ -193,7 +193,7 @@ export function AdminParticipantsPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {p.submissionStatus !== 'approved' && (
+                      {p.submissionStatus !== 'approved' ? (
                         <button
                           type="button"
                           onClick={() => statusMutation.mutate({ id: p.id, action: 'approve' })}
@@ -201,6 +201,15 @@ export function AdminParticipantsPage() {
                         >
                           <Check className="h-3.5 w-3.5" aria-hidden="true" />
                           <span>Setujui</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => statusMutation.mutate({ id: p.id, action: 'approve' })}
+                          className="inline-flex min-h-[38px] items-center gap-1 rounded-[var(--radius-md)] border border-[var(--color-primary-green)] px-3 text-xs font-semibold text-[var(--color-primary-forest)] hover:bg-[var(--color-accent-mint)]/40"
+                        >
+                          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>Terbitkan Sertifikat</span>
                         </button>
                       )}
                       {p.submissionStatus !== 'rejected' && (

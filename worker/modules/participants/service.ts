@@ -21,7 +21,8 @@ import {
 import { verifyPassword } from '../../security/password';
 import { verifyTurnstileToken } from '../../security/turnstile';
 import { insertAuditLog } from '../auth/repository';
-import type { EventRow } from '../events/repository';
+import { queueDocumentForParticipant } from '../documents/service';
+import { findEventRowById, type EventRow } from '../events/repository';
 import { listFormVersionsByEvent } from '../forms/repository';
 import { listSettings } from '../settings/repository';
 import {
@@ -121,7 +122,7 @@ export async function registerPublicParticipant(
     remoteIp?: string | null;
     requestId: string;
   },
-): Promise<PublicRegisterResponse> {
+): Promise<{ response: PublicRegisterResponse; generationJobId: string | null }> {
   const db = env.DB!;
   const eventRow = await findPublicEventBySlug(db, params.slug);
   if (!eventRow) {
@@ -281,14 +282,38 @@ export async function registerPublicParticipant(
     throw err;
   }
 
+  let generationJobId: string | null = null;
+  if (submissionStatus === 'approved') {
+    const recipientName =
+      lookupFieldValue(validation.sanitized, 'nama_lengkap') ||
+      lookupFieldValue(validation.sanitized, 'nama') ||
+      'Peserta';
+    try {
+      const queued = await queueDocumentForParticipant(env, {
+        eventId: eventRow.id,
+        eventCode: eventRow.event_code,
+        participantId,
+        recipientDataEncrypted: encryptedData,
+        recipientName,
+        adminId: null,
+      });
+      generationJobId = queued?.jobId || null;
+    } catch {
+      // Never fail registration if document queueing encounters an issue
+    }
+  }
+
   return {
-    participantId,
-    submissionStatus,
-    recoveryCode,
-    message:
-      submissionStatus === 'pending_review'
-        ? 'Data Anda berhasil dikirim dan sedang menunggu persetujuan panitia. Simpan kode pemulihan di bawah ini.'
-        : 'Data Anda berhasil dikirim. Simpan kode pemulihan di bawah ini untuk mengakses atau mengunduh sertifikat Anda.',
+    response: {
+      participantId,
+      submissionStatus,
+      recoveryCode,
+      message:
+        submissionStatus === 'pending_review'
+          ? 'Data Anda berhasil dikirim dan sedang menunggu persetujuan panitia. Simpan kode pemulihan di bawah ini.'
+          : 'Data Anda berhasil dikirim. Simpan kode pemulihan di bawah ini untuk mengakses atau mengunduh sertifikat Anda.',
+    },
+    generationJobId,
   };
 }
 
@@ -333,14 +358,15 @@ export async function getAdminParticipants(
 }
 
 export async function transitionParticipantStatus(
-  db: D1Database,
+  env: WorkerEnv,
   params: {
     participantId: string;
     targetStatus: 'approved' | 'rejected' | 'cancelled';
     adminId: string;
     requestId: string;
   },
-): Promise<void> {
+): Promise<{ generationJobId: string | null }> {
+  const db = env.DB!;
   const existing = await findParticipantById(db, params.participantId);
   if (!existing) {
     throw new AppError(ERROR_CODES.NOT_FOUND, 'Data peserta tidak ditemukan.', 404);
@@ -367,6 +393,39 @@ export async function transitionParticipantStatus(
     },
     requestId: params.requestId,
   });
+
+  let generationJobId: string | null = null;
+  if (params.targetStatus === 'approved') {
+    const event = await findEventRowById(db, existing.event_id);
+    if (event) {
+      let recipientName = 'Peserta';
+      if (env.DATA_ENCRYPTION_KEY) {
+        try {
+          const dec = await decryptSensitiveData(existing.encrypted_data, {
+            v1: env.DATA_ENCRYPTION_KEY,
+          });
+          const parsed = JSON.parse(dec) as Record<string, unknown>;
+          recipientName =
+            lookupFieldValue(parsed, 'nama_lengkap') ||
+            lookupFieldValue(parsed, 'nama') ||
+            'Peserta';
+        } catch {
+          recipientName = 'Peserta';
+        }
+      }
+      const queued = await queueDocumentForParticipant(env, {
+        eventId: event.id,
+        eventCode: event.event_code,
+        participantId: existing.id,
+        recipientDataEncrypted: existing.encrypted_data,
+        recipientName,
+        adminId: params.adminId,
+      });
+      generationJobId = queued?.jobId || null;
+    }
+  }
+
+  return { generationJobId };
 }
 
 export async function getAdminWhitelist(

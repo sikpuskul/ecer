@@ -5,6 +5,7 @@ import type { AppEnv } from '../../env';
 import { requireAdminAuth } from '../../middleware/auth';
 import { csrfOriginMiddleware } from '../../middleware/csrf';
 import { AppError } from '../../middleware/error-handler';
+import { processGenerationJob } from '../documents/service';
 import { findEventRowById } from '../events/repository';
 import {
   addAdminWhitelistEntries,
@@ -57,19 +58,22 @@ export function createAdminParticipantsRoutes() {
   routes.post('/participants/:id/approve', csrfOriginMiddleware, async (c) => {
     const admin = c.get('admin')!;
     const requestId = c.get('requestId');
-    await transitionParticipantStatus(c.env.DB!, {
+    const { generationJobId } = await transitionParticipantStatus(c.env, {
       participantId: c.req.param('id'),
       targetStatus: 'approved',
       adminId: admin.id,
       requestId,
     });
+    if (generationJobId) {
+      c.executionCtx.waitUntil(processGenerationJob(c.env, generationJobId, requestId));
+    }
     return c.json({ success: true as const, data: { status: 'approved' }, requestId }, 200);
   });
 
   routes.post('/participants/:id/reject', csrfOriginMiddleware, async (c) => {
     const admin = c.get('admin')!;
     const requestId = c.get('requestId');
-    await transitionParticipantStatus(c.env.DB!, {
+    await transitionParticipantStatus(c.env, {
       participantId: c.req.param('id'),
       targetStatus: 'rejected',
       adminId: admin.id,
@@ -81,7 +85,7 @@ export function createAdminParticipantsRoutes() {
   routes.post('/participants/:id/cancel', csrfOriginMiddleware, async (c) => {
     const admin = c.get('admin')!;
     const requestId = c.get('requestId');
-    await transitionParticipantStatus(c.env.DB!, {
+    await transitionParticipantStatus(c.env, {
       participantId: c.req.param('id'),
       targetStatus: 'cancelled',
       adminId: admin.id,

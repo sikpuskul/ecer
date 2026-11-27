@@ -7,6 +7,7 @@ import {
 } from '../../../shared/utils/jakarta-date';
 import type { AppEnv } from '../../env';
 import { AppError } from '../../middleware/error-handler';
+import { processGenerationJob } from '../documents/service';
 import { listFormVersionsByEvent } from '../forms/repository';
 import {
   countMonthlyIssuedCertificates,
@@ -184,15 +185,19 @@ export function createPublicRoutes() {
       );
     }
 
-    const result = await registerPublicParticipant(c.env, {
+    const { response, generationJobId } = await registerPublicParticipant(c.env, {
       slug: c.req.param('slug'),
       input: parsed.data,
       remoteIp: c.req.header('cf-connecting-ip'),
       requestId,
     });
 
+    if (generationJobId) {
+      c.executionCtx.waitUntil(processGenerationJob(c.env, generationJobId, requestId));
+    }
+
     c.header('Cache-Control', 'no-store');
-    return c.json({ success: true as const, data: result, requestId }, 201);
+    return c.json({ success: true as const, data: response, requestId }, 201);
   });
 
   return pub;
